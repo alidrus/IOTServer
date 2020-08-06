@@ -22,6 +22,7 @@ other device you would like to control using IoT).
 ### Requirements
 
 In order to compile and run this test, you will need:
+* Mac OS or Linux (I have only tested this on Mac OS)
 * [NodeMCU v3 Wireless WiFi Module](http://www.nodemcu.com/index_en.html)
 * [Arduino IDE](https://www.arduino.cc/en/Main/Software) or [Arduino CLI](https://github.com/arduino/arduino-cli)
 
@@ -43,3 +44,14 @@ comment:
 ```cpp
     // Serve the HTML page
 ```
+
+
+### Uploading To NodeMCU
+
+When you are ready to run the code on the NodeMCU, you can compile and
+upload it using Arduino IDE. If you have `arduino-cli` installed you can simply
+run `make upload` on the command-line and the code will be uploaded to the
+NodeMCU.
+
+If your NodeMCU serial device is not found you may need to edit the *Makefile*
+and change `/dev/tty.usbserial-1410` to the exact device your system detects.
