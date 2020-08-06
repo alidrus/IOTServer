@@ -1,0 +1,28 @@
+#!/usr/bin/env node
+// vim: syntax=javascript expandtab tabstop=4 shiftwidth=4 softtabstop=4:
+
+const fs = require("fs");
+
+fs.readFile("page.html", (err, data) => {
+    if (err)
+        throw err;
+
+    // Load the file contents to a string
+    const fileContents = data.toString();
+
+    // Load page.js contents into a string
+    const jsContents = fs.readFileSync("page.js",{encoding: 'utf8'});
+
+    // Join all the lines of the page into one single line
+    const oneLine = fileContents.split(/[\r\n]+/).map((line) => {
+        let content = line.trim();
+        if (content.match(/^<script><\/script>$/))
+        {
+            content = '<script>' + jsContents.split(/[\r\n]+/).map(line => line.trim()).join('') + '</script>';
+        }
+        return content;
+    }).join('');
+
+    // Final output
+    console.log('    client.println("' + oneLine.replace(/\"/g, '\\"') + '");');
+});
