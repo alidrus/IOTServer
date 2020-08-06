@@ -37,8 +37,9 @@ will need to edit the files *web/page.html* and *web/page.js* and then run
 `./printify` to convert it into minified code embedded in a `client.println()`
 statement.
 
-In order to change the contents of the page you will need to replace the line
-that comes directly after
+In order to change the contents of the page you will need to edit
+*IOTServer.ino* and replace the line that comes directly after the following
+comment:
 ```cpp
     // Serve the HTML page
 ```
