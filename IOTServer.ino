@@ -4,7 +4,7 @@
 #include "MyLED.h"
 
 // Comment this line out if you don't want serial console messages
-//#define DEBUG_MODE
+#define DEBUG_MODE
 
 WiFiServer server(80);
 
@@ -50,6 +50,9 @@ void setup() {
     Serial.println("");
     Serial.println("WiFi connected");
     Serial.print("IP address: ");
+    Serial.println(WiFi.localIP());
+    Serial.println("The IOT Server can be accessed via a browser at the following URL:");
+    Serial.print("http://");
     Serial.println(WiFi.localIP());
 #endif
 
