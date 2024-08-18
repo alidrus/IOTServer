@@ -6,8 +6,9 @@
  */
 #include <Arduino.h>
 
-#define LED_ON LOW
-#define LED_OFF HIGH
+#define LED_BUILTIN 2
+#define LED_ON HIGH
+#define LED_OFF LOW
 
 class MyLED
 {
