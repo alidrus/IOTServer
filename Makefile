@@ -1,16 +1,29 @@
-all: ..esp8266.esp8266.nodemcuv2.bin ..esp8266.esp8266.nodemcuv2.elf
+SHELL      := /bin/bash
+FQBN       := esp32:esp32:esp32
+BUILD_PATH := ./build
+SRCINO     := IOTServer.ino
+ELF        := $(BUILD_PATH)/$(SRCINO).elf
+SERIAL_DEV := /dev/ttyUSB0
+WEB_OUT    := ./web/web.out
+WEB_SRC    := ./web/page.js ./web/page.html
 
-upload: ..esp8266.esp8266.nodemcuv2.bin ..esp8266.esp8266.nodemcuv2.elf
-	arduino-cli upload --verbose -b esp8266:esp8266:nodemcuv2 -p /dev/tty.usbserial-1410 .
+all: $(ELF)
+.PHONY: all
 
-..esp8266.esp8266.nodemcuv2.bin: IOTServer.ino
-	arduino-cli compile --verbose -b esp8266:esp8266:nodemcuv2 .
+$(ELF): $(SRCINO)
+	arduino-cli compile --verbose --build-path $(BUILD_PATH) -b $(FQBN) -p $(SERIAL_DEV) .
 
-..esp8266.esp8266.nodemcuv2.elf: IOTServer.ino
-	arduino-cli compile --verbose -b esp8266:esp8266:nodemcuv2 .
+upload: $(ELF)
+	arduino-cli upload --verbose -b $(FQBN) -p $(SERIAL_DEV) --input-dir $(BUILD_PATH)
 
-edit: IOTServer.ino
-	vim IOTServer.ino
+$(WEB_OUT): $(WEB_SRC)
+	pushd web/ && \
+	./printify > web.out && \
+	./file2clipboard web.out && \
+	popd
+
+web: $(WEB_OUT)
+.PHONY: web
 
 clean:
-	rm -f ..arduino.avr.uno.elf ..arduino.avr.uno.hex
+	rm -vfr $(BUILD_PATH)/* $(WEB_OUT)
