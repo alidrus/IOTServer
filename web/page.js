@@ -1,7 +1,8 @@
 // this object will hold the current status of the LED as obtained from the
 // AJAX call
 let statusObj = {
-    ledIsOn: false
+    ledIsOn: false,
+    ajaxCallInProgress: false
 };
 
 const ids = {
@@ -18,13 +19,13 @@ const updateStatus = function (responseText) {
 
     if (statusObj.ledIsOn) {
         buttonObj.classList.add('turn-off');
-        buttonObj.innerText = 'OFF';
+        buttonObj.innerText = 'Turn OFF';
 
         ledStateObj.classList.add('is-on');
         ledStateObj.innerText = 'LED is ON';
     } else {
         buttonObj.classList.remove('turn-off');
-        buttonObj.innerText = 'ON';
+        buttonObj.innerText = 'Turn ON';
 
         ledStateObj.classList.remove('is-on');
         ledStateObj.innerText = 'LED is OFF';
@@ -52,10 +53,17 @@ const ajaxCall = function (statusOnly = false) {
 
 // executed upon page loads
 window.onload = () => {
-    ajaxCall(true);
-
     ids.refreshInterval = setInterval(() => {
+        // Skip if there is already an ajax call in progress
+        if (statusObj.ajaxCallInProgress) {
+            return;
+        }
+
+        statusObj.ajaxCallInProgress = true;
+
         ajaxCall(true);
+
+        statusObj.ajaxCallInProgress = false;
     }, 500);
 };
 
