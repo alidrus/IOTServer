@@ -4,6 +4,10 @@ let statusObj = {
     ledIsOn: false
 };
 
+const ids = {
+    refreshInterval: null,
+};
+
 // update the LED button and LED state on the page
 const updateStatus = function (responseText) {
     statusObj.ledIsOn = JSON.parse(responseText).ledIsOn;
@@ -46,9 +50,18 @@ const ajaxCall = function (statusOnly = false) {
     xhttp.send();
 };
 
-// query the state of the LED when the page loads
-window.onload = function() {
+// executed upon page loads
+window.onload = () => {
     ajaxCall(true);
+
+    ids.refreshInterval = setInterval(() => {
+        ajaxCall(true);
+    }, 500);
+};
+
+// executed before page unloads
+window.onbeforeunload = () => {
+    clearInterval(ids.refreshInterval);
 };
 
 // vim: syntax=javascript expandtab tabstop=4 shiftwidth=4 softtabstop=4:

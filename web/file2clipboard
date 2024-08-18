@@ -1,0 +1,11 @@
+#!/bin/bash
+#
+# vim: syntax=sh expandtab tabstop=4 shiftwidth=4 softtabstop=4:
+#
+
+if [ $# -gt 0 ]
+then
+    echo -n `cat $1` | xclip -selection clipboard
+else
+    echo "Usage: $0 <filename>"
+fi
