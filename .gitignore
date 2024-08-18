@@ -1,2 +1,3 @@
- ..esp8266.esp8266.nodemcuv2.bin
- ..esp8266.esp8266.nodemcuv2.elf
+.last-used
+build/
+web/web.out
