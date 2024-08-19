@@ -32,7 +32,7 @@ fs.readFile("page.html",{encoding: 'utf8'}, (err, data) => {
     }).join('');
 
     // Final output
-    console.log('static const char* index_html = "' + oneLine.replace(/\"/g, '\\"') + '";');
+    console.log('static const char* indexHtml = "' + oneLine.replace(/\"/g, '\\"') + '";');
 });
 
 // vim: syntax=javascript expandtab tabstop=4 shiftwidth=4 softtabstop=4:
