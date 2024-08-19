@@ -4,6 +4,7 @@ BUILD_PATH := ./build
 SRCINO     := IOTServer.ino
 ELF        := $(BUILD_PATH)/$(SRCINO).elf
 SERIAL_DEV := /dev/ttyUSB0
+BAUD_RATE  := 115200
 WEB_OUT    := ./web/web.out
 WEB_SRC    := ./web/page.js ./web/page.html
 
@@ -27,3 +28,6 @@ web: $(WEB_OUT)
 
 clean:
 	rm -vfr $(BUILD_PATH)/* $(WEB_OUT)
+
+monitor:
+	minicom --device=$(SERIAL_DEV) --baudrate=$(BAUD_RATE)
