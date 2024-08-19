@@ -1,6 +1,6 @@
 // this object will hold the current status of the LED as obtained from the
 // AJAX call
-let statusObj = {
+const statusObj = {
     ledIsOn: false,
     ajaxCallInProgress: false
 };
@@ -34,10 +34,7 @@ const updateStatus = function (responseText) {
 
 // query the state of the LED from the server or turn it on/off
 const ajaxCall = function (statusOnly = false) {
-    let url = '/led';
-
-    if (!statusOnly)
-        url += ('/' + (statusObj.ledIsOn ? '0' : '1'));
+    const url = '/led' + (statusOnly ? '' : ('/' + (statusObj.ledIsOn ? '0' : '1')));
 
     const xhttp=new XMLHttpRequest();
 
