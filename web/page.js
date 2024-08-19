@@ -64,7 +64,7 @@ window.onload = () => {
         ajaxCall(true);
 
         statusObj.ajaxCallInProgress = false;
-    }, 500);
+    }, 100);
 };
 
 // executed before page unloads
