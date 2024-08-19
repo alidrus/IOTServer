@@ -1,6 +1,7 @@
 // vim: syntax=arduino autoindent expandtab tabstop=4 shiftwidth=4 softtabstop=4:
 
 #include <WiFi.h>
+#include <NTPClient.h>
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 
@@ -9,6 +10,10 @@
 // Comment this line out if you don't want serial console messages
 #define DEBUG_MODE
 
+WiFiUDP ntpUDP;
+
+NTPClient timeClient(ntpUDP, "asia.pool.ntp.org", 28800, 60000);
+
 AsyncWebServer server(80);
 
 MyLED led;
@@ -16,8 +21,8 @@ MyLED led;
 static const char* okResponse = "HTTP/1.1 200 OK";
 static const char* contentHeaderJson = "Content-Type: application/json";
 static const char* contentHeaderHtml = "Content-Type: text/html";
-static const char* ledIsOnResponse = "{\"ledIsOn\": true}";
-static const char* ledIsOffResponse = "{\"ledIsOn\": false}";
+static const char* ledIsOnResponse = "{\"time\": \"%s\", \"ledIsOn\": true}";
+static const char* ledIsOffResponse = "{\"time\": \"%s\", \"ledIsOn\": false}";
 
 static const char* hostname = "iotserver";
 static const char* ssid = "Doudou-IoT";
@@ -25,25 +30,20 @@ static const char* password = "0123206635";
 
 static const char* indexHtml = "<!DOCTYPE html><html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><link rel=\"icon\" href=\"data:,\"><title>LED Control</title><style>html {font-family: Arial;display: inline-block;margin: 0px auto;text-align: center;}.led-state {background-color: #16161a;color: #fffffe;border: 0;border-radius: 50%;font-weight: bold;font-size: 16pt;margin: auto;width: 150px;height: 150px;text-align: center;vertical-align: middle;line-height: 150px;}.is-on {background-color: #1974D2;}.led-switch {background-color: #2cb67d;border: 0;color: #fffffe;padding: 8px 20px;text-decoration: none;font-size: 12pt;margin: 2px;cursor: pointer;border-radius: 15px 50px;width: 150px;outline: none;}.turn-off {background-color: #72757e;}</style></head><body><h1>LED Control</h1><div id=\"ledState\" class=\"led-state\">LED is OFF</div><p><button id=\"ledButton\" class=\"led-switch\" onclick=\"ajaxCall()\">Turn ON</button></p><script>const statusObj = {ledIsOn: false,ajaxCallInProgress: false};const ids = {refreshInterval: null,};const updateStatus = function (responseText) {statusObj.ledIsOn = JSON.parse(responseText).ledIsOn;const buttonObj = document.getElementById('ledButton');const ledStateObj = document.getElementById('ledState');if (statusObj.ledIsOn) {buttonObj.classList.add('turn-off');buttonObj.innerText = 'Turn OFF';ledStateObj.classList.add('is-on');ledStateObj.innerText = 'LED is ON';} else {buttonObj.classList.remove('turn-off');buttonObj.innerText = 'Turn ON';ledStateObj.classList.remove('is-on');ledStateObj.innerText = 'LED is OFF';}};const ajaxCall = function (statusOnly = false) {const url = '/led' + (statusOnly ? '' : ('/' + (statusObj.ledIsOn ? '0' : '1')));const xhttp=new XMLHttpRequest();xhttp.onreadystatechange = function() {if (this.readyState == 4 && this.status == 200)updateStatus(this.responseText);};xhttp.open('GET', url, true);xhttp.send();};window.onload = () => {ids.refreshInterval = setInterval(() => {if (statusObj.ajaxCallInProgress) {return;}statusObj.ajaxCallInProgress = true;ajaxCall(true);statusObj.ajaxCallInProgress = false;}, 100);};window.onbeforeunload = () => {clearInterval(ids.refreshInterval);};</script></body></html>";
 
+unsigned long lastSyncTime = millis();
+
+char stringBuffer[50];
+
 void wifiSetup() {
     // Disconnect from WiFi
-    WiFi.disconnect();
+    WiFi.disconnect(true, true);
 
     delay(1000);
 
     // Set hostname
-    /*
-    if (!WiFi.setHostname(hostname)) {
-        Serial.println("Failed to set Wifi hostname");
-    } else {
-        Serial.println("Set Wifi hostname");
-    }
+    WiFi.setHostname(hostname);
 
     // Set WiFi mode to station
-    WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE);  // This is a MUST!
-    */
-
-    // Connect in station mode
     WiFi.mode(WIFI_STA);
 
     // WiFi credentials
@@ -97,6 +97,8 @@ void setup() {
     // Set the pin mode for the built in LED port to OUTPUT
     pinMode(LED_BUILTIN, OUTPUT);
 
+    timeClient.begin();
+
 #ifdef DEBUG_MODE
     // DEBUG messages on serial console
     Serial.println("Starting server...");
@@ -112,7 +114,8 @@ void setup() {
     server.on("/led/1", HTTP_GET, [] (AsyncWebServerRequest *request) {
         Serial.println("REQUEST: /led/1");
         led.turnOn(false);
-        request->send(200, "text/html", led.isOn() ? ledIsOnResponse : ledIsOffResponse);
+        sprintf(stringBuffer, led.isOn() ? ledIsOnResponse : ledIsOffResponse, timeClient.getFormattedTime());
+        request->send(200, "text/html", stringBuffer);
         Serial.println(String("RESPONSE: ") + (led.isOn() ? ledIsOnResponse : ledIsOffResponse));
     });
 
@@ -120,14 +123,16 @@ void setup() {
     server.on("/led/0", HTTP_GET, [] (AsyncWebServerRequest *request) {
         Serial.println("REQUEST: /led/0");
         led.turnOff(false);
-        request->send(200, "text/html", led.isOn() ? ledIsOnResponse : ledIsOffResponse);
+        sprintf(stringBuffer, led.isOn() ? ledIsOnResponse : ledIsOffResponse, timeClient.getFormattedTime());
+        request->send(200, "text/html", stringBuffer);
         Serial.println(String("RESPONSE: ") + (led.isOn() ? ledIsOnResponse : ledIsOffResponse));
     });
 
     // Route for GET request to /led (ordering is important as this matches
     // like a regex so it has to come after /led/1 and /led/0)
     server.on("/led", HTTP_GET, [](AsyncWebServerRequest *request) {
-        request->send(200, "text/html", led.isOn() ? ledIsOnResponse : ledIsOffResponse);
+        sprintf(stringBuffer, led.isOn() ? ledIsOnResponse : ledIsOffResponse, timeClient.getFormattedTime());
+        request->send(200, "text/html", stringBuffer);
     });
 
     // Reply with a 404 error if request does not match anything else
@@ -148,7 +153,15 @@ void setup() {
 }
 
 void loop() {
+    unsigned long timeElapsed = millis();
+
     if (WiFi.status() != WL_CONNECTED) {
         wifiSetup();
+    }
+
+    // Run ntp update every 1 seconds
+    if ((timeElapsed - lastSyncTime) >= 1000) {
+        lastSyncTime = timeElapsed;
+        timeClient.update();
     }
 }
