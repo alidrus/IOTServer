@@ -4,6 +4,7 @@
 #include <NTPClient.h>
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
+#include <DHT.h>
 
 #include "MyLED.h"
 
@@ -18,11 +19,15 @@ AsyncWebServer server(80);
 
 MyLED led;
 
+DHT dht(26, DHT22);
+
 static const char* okResponse = "HTTP/1.1 200 OK";
 static const char* contentHeaderJson = "Content-Type: application/json";
 static const char* contentHeaderHtml = "Content-Type: text/html";
 static const char* ledIsOnResponse = "{\"time\": \"%s\", \"ledIsOn\": true}";
 static const char* ledIsOffResponse = "{\"time\": \"%s\", \"ledIsOn\": false}";
+static const char* temperatureResponse = "{\"temperature\": %.3f}";
+static const char* humidityResponse = "{\"humidity\": %.3f}";
 
 static const char* hostname = "iotserver";
 static const char* ssid = "Doudou-IoT";
@@ -91,6 +96,10 @@ void setup() {
     Serial.begin(115200);
 #endif
 
+    dht.begin();
+
+    delay(1000);
+
     // Setup WiFi
     wifiSetup();
 
@@ -115,7 +124,7 @@ void setup() {
         Serial.println("REQUEST: /led/1");
         led.turnOn(false);
         sprintf(stringBuffer, led.isOn() ? ledIsOnResponse : ledIsOffResponse, timeClient.getFormattedTime());
-        request->send(200, "text/html", stringBuffer);
+        request->send(200, "application/json", stringBuffer);
         Serial.println(String("RESPONSE: ") + (led.isOn() ? ledIsOnResponse : ledIsOffResponse));
     });
 
@@ -124,7 +133,7 @@ void setup() {
         Serial.println("REQUEST: /led/0");
         led.turnOff(false);
         sprintf(stringBuffer, led.isOn() ? ledIsOnResponse : ledIsOffResponse, timeClient.getFormattedTime());
-        request->send(200, "text/html", stringBuffer);
+        request->send(200, "application/json", stringBuffer);
         Serial.println(String("RESPONSE: ") + (led.isOn() ? ledIsOnResponse : ledIsOffResponse));
     });
 
@@ -132,7 +141,19 @@ void setup() {
     // like a regex so it has to come after /led/1 and /led/0)
     server.on("/led", HTTP_GET, [](AsyncWebServerRequest *request) {
         sprintf(stringBuffer, led.isOn() ? ledIsOnResponse : ledIsOffResponse, timeClient.getFormattedTime());
-        request->send(200, "text/html", stringBuffer);
+        request->send(200, "application/json", stringBuffer);
+    });
+
+    // Route for GET request to /temperature
+    server.on("/temperature", HTTP_GET, [](AsyncWebServerRequest *request) {
+        sprintf(stringBuffer, temperatureResponse, dht.readTemperature());
+        request->send(200, "application/json", stringBuffer);
+    });
+
+    // Route for GET request to /humidity
+    server.on("/humidity", HTTP_GET, [](AsyncWebServerRequest *request) {
+        sprintf(stringBuffer, humidityResponse, dht.readHumidity());
+        request->send(200, "application/json", stringBuffer);
     });
 
     // Reply with a 404 error if request does not match anything else
