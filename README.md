@@ -1,3 +1,6 @@
+# ATTENTION: This README.md file is VERY outdated. The interface no longer looks like what's described below and the project has been upgraded to use ESP32 instead.
+
+
 # IOTServer
 ## Proof Of Concept
 
