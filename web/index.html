@@ -75,7 +75,12 @@
             }
             .comfort-status-emoji {
                 text-align: center;
-                font-size: 32pt;
+                font-size: 36pt;
+                width: 200px !important;
+                border: 0 !important;
+            }
+            .thermostat-setting {
+                font-size: 18pt;
             }
         </style>
     </head>
@@ -110,14 +115,13 @@
                     </tr>
                 </table>
             </div>
-            <div id="comfortStatusEmoji" class="comfort-status-emoji">
-            </div>
+            <div id="comfortStatusEmoji" class="comfort-status-emoji"></div>
             <div>
                 <table>
                     <caption>Thermostat</caption>
                     <tr>
                         <th rowspan="2">
-                            <span id="thermostatSetting"></span>
+                            <span id="thermostatSetting" class="thermostat-setting"></span>
                         </th>
                         <td class="button-cell">
                             <button id="upButton" class="control-switch" onclick="temperatureUp()">▲</button>
