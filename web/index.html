@@ -4,6 +4,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="icon" href="data:,">
         <title>LED Control</title>
+        <meta charset="UTF-8">
         <style>
             html {
                 font-family: Helvetica;
@@ -41,13 +42,17 @@
                     <span id="temperatureReading"></span>
                 </div>
                 <div class="display-state">
-                    <span>Feels like:</span>
+                    <span>Heat Index:</span>
                     <span id="heatIndexReading"></span>
                     <span id="comfortStatusEmoji"></span>
                 </div>
                 <div class="display-state">
                     <span>Humidity:</span>
                     <span id="humidityReading"></span>
+                </div>
+                <div class="display-state">
+                    <span>Dew Point:</span>
+                    <span id="dewPointReading"></span>
                 </div>
             </div>
         </div>
@@ -77,35 +82,37 @@ const csEmoji = {
 
 // update the LED button and LED state on the page
 const updateStatus = function (responseText) {
-    statusObj.environment = JSON.parse(responseText).ledIsOn;
+    statusObj.environment = JSON.parse(responseText);
 
     if (statusObj.environment === null) {
         return;
     }
 
+    console.log(statusObj.environment);
+
     if (Object.hasOwn(statusObj.environment, 'ts')) {
         const tsObj = document.getElementById('thermostatSetting');
-        tsObj.innerText = statusObj.environment.ts;
+        tsObj.innerText = statusObj.environment.ts + '°C';
     }
 
     if (Object.hasOwn(statusObj.environment, 't')) {
         const tObj = document.getElementById('temperatureReading');
-        tObj.innerText = statusObj.environment.t;
+        tObj.innerText = statusObj.environment.t + '°C';
     }
 
     if (Object.hasOwn(statusObj.environment, 'h')) {
         const hObj = document.getElementById('humidityReading');
-        hObj.innerText = statusObj.environment.h;
+        hObj.innerText = statusObj.environment.h + '%';
     }
 
     if (Object.hasOwn(statusObj.environment, 'hi')) {
         const hiObj = document.getElementById('heatIndexReading');
-        hiObj.innerText = statusObj.environment.hi;
+        hiObj.innerText = statusObj.environment.hi + '°C';
     }
 
     if (Object.hasOwn(statusObj.environment, 'dp')) {
         const dpObj = document.getElementById('dewPointReading');
-        dpObj.innerText = statusObj.environment.dp;
+        dpObj.innerText = statusObj.environment.dp + '°C';
     }
 
     if (Object.hasOwn(statusObj.environment, 'cs')) {
