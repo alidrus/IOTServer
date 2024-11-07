@@ -1,38 +1,15 @@
 #!/usr/bin/env node
 const fs = require("fs");
 
-fs.readFile("page.html",{encoding: 'utf8'}, (err, data) => {
+fs.readFile("index.min.html",{encoding: 'utf8'}, (err, data) => {
     if (err)
         throw err;
 
     // Load the file contents to a string
     const fileContents = data.toString();
 
-    // Load page.js contents into a string
-    const jsContents = fs.readFileSync("page.js",{encoding: 'utf8'})
-        .split(/[\r\n]+/)
-        .map((line) => {
-            // remove comments
-            line = line.replace(/\/\/.*$/, '');
-            // return the line sans leading and trailing whitespace
-            return line.trim();
-        })
-        .join('');
-
-    // Join all the lines of the page into one single line
-    const oneLine = fileContents.split(/[\r\n]+/).map((line) => {
-        let content = line.trim();
-
-        if (content.match(/^<script><\/script>$/))
-        {
-            content = '<script>' + jsContents + '</script>';
-        }
-
-        return content;
-    }).join('');
-
     // Final output
-    console.log('static const char* indexHtml = "' + oneLine.replace(/\"/g, '\\"') + '";');
+    console.log('static const char* indexHtml = "' + fileContents.replace(/\"/g, '\\"') + '";');
 });
 
 // vim: syntax=javascript expandtab tabstop=4 shiftwidth=4 softtabstop=4:
