@@ -4,12 +4,22 @@
 #include <NTPClient.h>
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
-#include <DHT.h>
-
+#include <DHTesp.h>
+#include <IRremote.h>
 #include "MyLED.h"
 
 // Comment this line out if you don't want serial console messages
 #define DEBUG_MODE
+
+// Infrared remote carrier frequency
+#define IR_CARRIER_FREQUENCY  38
+
+
+int dhtPin = 17;
+
+int irPin = 4;
+
+float thermostatSetting = 27;
 
 WiFiUDP ntpUDP;
 
@@ -19,25 +29,78 @@ AsyncWebServer server(80);
 
 MyLED led;
 
-DHT dht(26, DHT22);
+DHTesp dht;
+
+ComfortState cf;
+
+IRsend irsend(irPin);
 
 static const char* okResponse = "HTTP/1.1 200 OK";
 static const char* contentHeaderJson = "Content-Type: application/json";
 static const char* contentHeaderHtml = "Content-Type: text/html";
 static const char* ledIsOnResponse = "{\"time\": \"%s\", \"ledIsOn\": true}";
 static const char* ledIsOffResponse = "{\"time\": \"%s\", \"ledIsOn\": false}";
-static const char* temperatureResponse = "{\"temperature\": %.3f}";
-static const char* humidityResponse = "{\"humidity\": %.3f}";
+static const char* environmentResponse = "{\"ts\": %.1f, \"t\": %.1f, \"h\": %.1f, \"hi\": %.1f, \"dp\": %.1f, \"cs\": \"%s\"}";
 
 static const char* hostname = "iotserver";
 static const char* ssid = "Doudou-IoT";
 static const char* password = "0123206635";
 
-static const char* indexHtml = "<!DOCTYPE html><html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><link rel=\"icon\" href=\"data:,\"><title>LED Control</title><style>html {font-family: Arial;display: inline-block;margin: 0px auto;text-align: center;}.led-state {background-color: #16161a;color: #fffffe;border: 0;border-radius: 50%;font-weight: bold;font-size: 16pt;margin: auto;width: 150px;height: 150px;text-align: center;vertical-align: middle;line-height: 150px;}.is-on {background-color: #1974D2;}.led-switch {background-color: #2cb67d;border: 0;color: #fffffe;padding: 8px 20px;text-decoration: none;font-size: 12pt;margin: 2px;cursor: pointer;border-radius: 15px 50px;width: 150px;outline: none;}.turn-off {background-color: #72757e;}</style></head><body><h1>LED Control</h1><div id=\"ledState\" class=\"led-state\">LED is OFF</div><p><button id=\"ledButton\" class=\"led-switch\" onclick=\"ajaxCall()\">Turn ON</button></p><script>const statusObj = {ledIsOn: false,ajaxCallInProgress: false};const ids = {refreshInterval: null,};const updateStatus = function (responseText) {statusObj.ledIsOn = JSON.parse(responseText).ledIsOn;const buttonObj = document.getElementById('ledButton');const ledStateObj = document.getElementById('ledState');if (statusObj.ledIsOn) {buttonObj.classList.add('turn-off');buttonObj.innerText = 'Turn OFF';ledStateObj.classList.add('is-on');ledStateObj.innerText = 'LED is ON';} else {buttonObj.classList.remove('turn-off');buttonObj.innerText = 'Turn ON';ledStateObj.classList.remove('is-on');ledStateObj.innerText = 'LED is OFF';}};const ajaxCall = function (statusOnly = false) {const url = '/led' + (statusOnly ? '' : ('/' + (statusObj.ledIsOn ? '0' : '1')));const xhttp=new XMLHttpRequest();xhttp.onreadystatechange = function() {if (this.readyState == 4 && this.status == 200)updateStatus(this.responseText);};xhttp.open('GET', url, true);xhttp.send();};window.onload = () => {ids.refreshInterval = setInterval(() => {if (statusObj.ajaxCallInProgress) {return;}statusObj.ajaxCallInProgress = true;ajaxCall(true);statusObj.ajaxCallInProgress = false;}, 100);};window.onbeforeunload = () => {clearInterval(ids.refreshInterval);};</script></body></html>";
+static const char* indexHtml = "<!DOCTYPE html><html><head><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><link rel=\"icon\" href=\"data:,\"><title>LED Control</title><meta charset=\"UTF-8\"><style>html{font-family:Helvetica;display:inline-block;margin:0 auto;text-align:center}.columns{display:flex;flex-direction:row;justify-content:center;align-items:flex-start}.columns>div{margin:20px}</style></head><body><div class=\"columns\"><div><h4>Thermostat</h4><div id=\"thermostat\" class=\"display-state\"><div id=\"thermostatSetting\" class=\"display-state\"></div><div><button id=\"upButton\" class=\"control-switch\" onclick=\"temperatureUp()\">▲</button> <button id=\"downButton\" class=\"control-switch\" onclick=\"temperatureDown()\">▼</button></div></div></div><div><h4>Environment</h4><div class=\"display-state\"><span>Temperature:</span> <span id=\"temperatureReading\"></span></div><div class=\"display-state\"><span>Heat Index:</span> <span id=\"heatIndexReading\"></span> <span id=\"comfortStatusEmoji\"></span></div><div class=\"display-state\"><span>Humidity:</span> <span id=\"humidityReading\"></span></div><div class=\"display-state\"><span>Dew Point:</span> <span id=\"dewPointReading\"></span></div></div></div><script>let statusObj={environment:null,ajaxCallInProgress:!1},ids={refreshInterval:null},csEmoji={OK:\"😊🌡️\",TooHot:\"🥵🔥\",TooCold:\"🥶❄️\",TooDry:\"💨🌵\",TooHumid:\"😓💧\",HotAndHumid:\"🥵💦\",HotAndDry:\"🥵🌵\",ColdAndHumid:\"🥶💧\",ColdAndDry:\"🥶🌵\"},updateStatus=function(t){statusObj.environment=JSON.parse(t),null!==statusObj.environment&&(console.log(statusObj.environment),Object.hasOwn(statusObj.environment,\"ts\")&&(document.getElementById(\"thermostatSetting\").innerText=statusObj.environment.ts+\"°C\"),Object.hasOwn(statusObj.environment,\"t\")&&(document.getElementById(\"temperatureReading\").innerText=statusObj.environment.t+\"°C\"),Object.hasOwn(statusObj.environment,\"h\")&&(document.getElementById(\"humidityReading\").innerText=statusObj.environment.h+\"%\"),Object.hasOwn(statusObj.environment,\"hi\")&&(document.getElementById(\"heatIndexReading\").innerText=statusObj.environment.hi+\"°C\"),Object.hasOwn(statusObj.environment,\"dp\")&&(document.getElementById(\"dewPointReading\").innerText=statusObj.environment.dp+\"°C\"),Object.hasOwn(statusObj.environment,\"cs\"))&&(document.getElementById(\"comfortStatusEmoji\").innerText=Object.hasOwn(csEmoji,statusObj.environment.cs)?csEmoji[statusObj.environment.cs]:\"?\")},ajaxCall=()=>{var t=new XMLHttpRequest;t.onreadystatechange=function(){4==this.readyState&&200==this.status&&updateStatus(this.responseText)},t.open(\"GET\",\"/environment\",!0),t.send()},temperatureUp=()=>{console.log(\"up!\")},temperatureDown=()=>{console.log(\"down!\")};window.onload=()=>{ids.refreshInterval=setInterval(()=>{statusObj.ajaxCallInProgress||(statusObj.ajaxCallInProgress=!0,ajaxCall(),statusObj.ajaxCallInProgress=!1)},2e3)},window.onbeforeunload=()=>{clearInterval(ids.refreshInterval)}</script></body></html>";
 
 unsigned long lastSyncTime = millis();
 
-char stringBuffer[50];
+// Raw IR timings
+const uint16_t txPowerToggle[] = {
+    9788, 9676, 9812, 9680, 4652, 2408, 432, 296, 436, 868,
+    436, 868, 432, 296, 432, 872, 432, 296, 436, 296,
+    432, 296, 432, 300, 432, 296, 432, 868, 436, 296,
+    432, 296, 436, 868, 432, 300, 432, 296, 436, 292,
+    432, 872, 432, 296, 436, 296, 432, 296, 432, 296,
+    436, 868, 436, 296, 432, 868, 436, 296, 432, 872,
+    432, 296, 432, 300, 432, 292, 436, 296, 432, 300,
+    432, 296, 432, 296, 436, 296, 432, 296, 436, 864,
+    436, 296, 436, 296, 432, 296, 432, 300, 432, 296,
+    432, 296, 436, 296, 432, 868, 436, 296, 432, 296,
+    436, 296, 432, 296, 432, 296, 436, 1100, 204, 292,
+    436, 296, 432, 868, 436, 296, 432, 300, 432, 868,
+    432, 300, 432, 868, 436, 868, 432, 868, 436, 296,
+    432, 868, 436, 868, 436, 20048, 4652
+};
+const uint16_t txFanMode[] = {
+    9788, 9676, 9816, 9676, 4656, 2404, 436, 296, 436, 864,
+    436, 868, 436, 296, 432, 868, 436, 328, 404, 288,
+    440, 296, 432, 296, 436, 292, 436, 868, 436, 296,
+    432, 296, 436, 864, 436, 296, 436, 296, 436, 324,
+    404, 864, 436, 868, 436, 296, 432, 868, 436, 868,
+    436, 296, 432, 296, 436, 864, 436, 296, 436, 864,
+    440, 292, 436, 296, 432, 296, 436, 328, 400, 328,
+    404, 292, 436, 296, 432, 296, 436, 296, 432, 868,
+    436, 296, 432, 296, 436, 292, 436, 292, 436, 296,
+    436, 296, 432, 296, 436, 864, 436, 296, 436, 328,
+    400, 296, 436, 868, 432, 868, 436, 868, 436, 292,
+    436, 296, 432, 872, 432, 328, 404, 292, 436, 868,
+    436, 296, 432, 868, 436, 296, 432, 868, 436, 868,
+    436, 292, 436, 868, 436, 20044, 4656
+};
+const uint16_t txCoolingMode[] = {
+    9788, 9680, 9812, 9680, 4652, 2408, 432, 300, 428, 868,
+    436, 868, 436, 300, 428, 872, 432, 296, 432, 300,
+    428, 300, 432, 300, 432, 868, 432, 300, 428, 300,
+    432, 300, 428, 872, 432, 300, 432, 296, 432, 300,
+    428, 300, 432, 868, 432, 300, 432, 300, 428, 300,
+    428, 872, 432, 300, 432, 868, 432, 300, 432, 868,
+    432, 300, 432, 300, 432, 296, 432, 296, 432, 300,
+    432, 296, 432, 300, 428, 300, 432, 296, 432, 872,
+    432, 300, 428, 300, 432, 300, 428, 300, 428, 300,
+    432, 300, 428, 300, 432, 868, 432, 300, 432, 296,
+    432, 300, 428, 304, 428, 300, 428, 872, 432, 300,
+    432, 300, 428, 868, 432, 300, 432, 296, 432, 872,
+    432, 300, 432, 868, 432, 300, 432, 868, 432, 300,
+    432, 868, 432, 300, 432, 20052, 4652
+};
+
+char stringBuffer[96];
 
 void wifiSetup() {
     // Disconnect from WiFi
@@ -96,7 +159,7 @@ void setup() {
     Serial.begin(115200);
 #endif
 
-    dht.begin();
+    dht.setup(dhtPin, DHTesp::DHT22);
 
     delay(1000);
 
@@ -116,7 +179,21 @@ void setup() {
     // Route for root / web page
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
         Serial.println("REQUEST: /");
-        request->send(200, "text/html", indexHtml);
+        request->send(200, "text/html; charset=UTF-8", indexHtml);
+    });
+
+    // Route for GET request to /tx/cooling
+    server.on("/tx/cooling", HTTP_GET, [] (AsyncWebServerRequest *request) {
+        // Send txCoolingMode
+        irsend.sendRaw(txCoolingMode, sizeof(txCoolingMode) / sizeof(txCoolingMode[0]), IR_CARRIER_FREQUENCY);
+        request->send(200, "text/plain", "OK");
+    });
+
+    // Route for GET request to /tx/fan
+    server.on("/tx/fan", HTTP_GET, [] (AsyncWebServerRequest *request) {
+        // Send txFanMode
+        irsend.sendRaw(txFanMode, sizeof(txFanMode) / sizeof(txFanMode[0]), IR_CARRIER_FREQUENCY);
+        request->send(200, "text/plain", "OK");
     });
 
     // Route for GET request to /led/0
@@ -145,15 +222,54 @@ void setup() {
     });
 
     // Route for GET request to /temperature
-    server.on("/temperature", HTTP_GET, [](AsyncWebServerRequest *request) {
-        sprintf(stringBuffer, temperatureResponse, dht.readTemperature());
-        request->send(200, "application/json", stringBuffer);
-    });
+    server.on("/environment", HTTP_GET, [](AsyncWebServerRequest *request) {
+        TempAndHumidity dhtValues = dht.getTempAndHumidity();
 
-    // Route for GET request to /humidity
-    server.on("/humidity", HTTP_GET, [](AsyncWebServerRequest *request) {
-        sprintf(stringBuffer, humidityResponse, dht.readHumidity());
-        request->send(200, "application/json", stringBuffer);
+        if (dht.getStatus() != 0) {
+            request->send(503, "text/plain", "Service unavailable");
+        } else {
+            float heatIndex = dht.computeHeatIndex(dhtValues.temperature, dhtValues.humidity);
+            float dewPoint = dht.computeDewPoint(dhtValues.temperature, dhtValues.humidity);
+            float cr = dht.getComfortRatio(cf, dhtValues.temperature, dhtValues.humidity);
+
+            String comfortStatus;
+
+            switch(cf) {
+                case Comfort_OK:
+                    comfortStatus = "OK";
+                    break;
+                case Comfort_TooHot:
+                    comfortStatus = "TooHot";
+                    break;
+                case Comfort_TooCold:
+                    comfortStatus = "TooCold";
+                    break;
+                case Comfort_TooDry:
+                    comfortStatus = "TooDry";
+                    break;
+                case Comfort_TooHumid:
+                    comfortStatus = "TooHumid";
+                    break;
+                case Comfort_HotAndHumid:
+                    comfortStatus = "HotAndHumid";
+                    break;
+                case Comfort_HotAndDry:
+                    comfortStatus = "HotAndDry";
+                    break;
+                case Comfort_ColdAndHumid:
+                    comfortStatus = "ColdAndHumid";
+                    break;
+                case Comfort_ColdAndDry:
+                    comfortStatus = "ColdAndDry";
+                    break;
+                default:
+                    comfortStatus = "Unknown";
+                    break;
+            };
+
+            sprintf(stringBuffer, environmentResponse, thermostatSetting, dhtValues.temperature, dhtValues.humidity, heatIndex, dewPoint, comfortStatus);
+            request->send(200, "application/json", stringBuffer);
+        }
     });
 
     // Reply with a 404 error if request does not match anything else
