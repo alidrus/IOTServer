@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="icon" href="data:,">
+        <title>LED Control</title>
+        <style>
+            html {
+                font-family: Helvetica;
+                display: inline-block;
+                margin: 0px auto;
+                text-align: center;
+            }
+            .columns {
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                align-items: flex-start;
+            }
+            .columns > div {
+                margin: 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="columns">
+            <div>
+                <h4>Thermostat</h4>
+                <div id="thermostat" class="display-state">
+                    <div id="thermostatSetting" class="display-state"></div>
+                    <div>
+                        <button id="upButton" class="control-switch" onclick="temperatureUp()">▲</button>
+                        <button id="downButton" class="control-switch" onclick="temperatureDown()">▼</button>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <h4>Environment</h4>
+                <div class="display-state">
+                    <span>Temperature:</span>
+                    <span id="temperatureReading"></span>
+                </div>
+                <div class="display-state">
+                    <span>Feels like:</span>
+                    <span id="heatIndexReading"></span>
+                    <span id="comfortStatusEmoji"></span>
+                </div>
+                <div class="display-state">
+                    <span>Humidity:</span>
+                    <span id="humidityReading"></span>
+                </div>
+            </div>
+        </div>
+<script>
+// this object will hold the current status of the LED as obtained from the
+// AJAX call
+const statusObj = {
+    environment: null,
+    ajaxCallInProgress: false
+};
+
+const ids = {
+    refreshInterval: null,
+};
+
+const csEmoji = {
+    'OK': '😊🌡️',
+    'TooHot': '🥵🔥',
+    'TooCold': '🥶❄️' ,
+    'TooDry': '💨🌵',
+    'TooHumid': '😓💧',
+    'HotAndHumid': '🥵💦',
+    'HotAndDry': '🥵🌵',
+    'ColdAndHumid': '🥶💧',
+    'ColdAndDry': '🥶🌵',
+};
+
+// update the LED button and LED state on the page
+const updateStatus = function (responseText) {
+    statusObj.environment = JSON.parse(responseText).ledIsOn;
+
+    if (statusObj.environment === null) {
+        return;
+    }
+
+    if (Object.hasOwn(statusObj.environment, 'ts')) {
+        const tsObj = document.getElementById('thermostatSetting');
+        tsObj.innerText = statusObj.environment.ts;
+    }
+
+    if (Object.hasOwn(statusObj.environment, 't')) {
+        const tObj = document.getElementById('temperatureReading');
+        tObj.innerText = statusObj.environment.t;
+    }
+
+    if (Object.hasOwn(statusObj.environment, 'h')) {
+        const hObj = document.getElementById('humidityReading');
+        hObj.innerText = statusObj.environment.h;
+    }
+
+    if (Object.hasOwn(statusObj.environment, 'hi')) {
+        const hiObj = document.getElementById('heatIndexReading');
+        hiObj.innerText = statusObj.environment.hi;
+    }
+
+    if (Object.hasOwn(statusObj.environment, 'dp')) {
+        const dpObj = document.getElementById('dewPointReading');
+        dpObj.innerText = statusObj.environment.dp;
+    }
+
+    if (Object.hasOwn(statusObj.environment, 'cs')) {
+        const csObj = document.getElementById('comfortStatusEmoji');
+        csObj.innerText = Object.hasOwn(csEmoji, statusObj.environment.cs) ? csEmoji[statusObj.environment.cs] : '?';
+    }
+};
+
+// query the state of the LED from the server or turn it on/off
+const ajaxCall = () => {
+    const url = '/environment';
+
+    const xhttp=new XMLHttpRequest();
+
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200)
+            updateStatus(this.responseText);
+    };
+
+    xhttp.open('GET', url, true);
+
+    xhttp.send();
+};
+
+const temperatureUp = () => {
+    console.log('up!');
+};
+
+const temperatureDown = () => {
+    console.log('down!');
+};
+
+// executed upon page loads
+window.onload = () => {
+    ids.refreshInterval = setInterval(() => {
+        // Skip if there is already an ajax call in progress
+        if (statusObj.ajaxCallInProgress) {
+            return;
+        }
+
+        statusObj.ajaxCallInProgress = true;
+
+        ajaxCall();
+
+        statusObj.ajaxCallInProgress = false;
+    }, 2000);
+};
+
+// executed before page unloads
+window.onbeforeunload = () => {
+    clearInterval(ids.refreshInterval);
+};
+</script>
+    </body>
+</html>
