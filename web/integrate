@@ -5,4 +5,4 @@
 
 cd `dirname $0`
 html-minifier --collapse-whitespace --remove-comments --minify-css true --minify-js true index.html -o index.min.html
-./printify | file2clipboard raw -
+./printify | tee ../IndexHtml.h
