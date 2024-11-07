@@ -11,7 +11,7 @@ WEB_SRC    := ./web/page.js ./web/page.html
 all: $(ELF)
 .PHONY: all
 
-$(ELF): $(SRCINO)
+$(ELF): $(SRCINO) IndexHtml.h
 	arduino-cli compile --verbose --build-path $(BUILD_PATH) -b $(FQBN) -p $(SERIAL_DEV) .
 
 upload: $(ELF)
