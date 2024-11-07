@@ -26,42 +26,73 @@
             }
             html {
                 font-family: "Audiowide", sans-serif;
-                font-weight: 400;
-                font-style: normal;
+            }
+            caption {
+                text-align: center;
+                font-weight: bold;
+                font-size: 14pt;
+            }
+            th {
+                text-align: right;
+                font-weight: bold;
+                font-size: 12pt;
+            }
+            td {
+                text-align: left;
+                font-weight: normal;
+                font-size: 12pt;
             }
         </style>
     </head>
     <body>
         <div class="columns">
             <div>
-                <h4>Thermostat</h4>
-                <div id="thermostat" class="display-state">
-                    <div id="thermostatSetting" class="display-state"></div>
-                    <div>
-                        <button id="upButton" class="control-switch" onclick="temperatureUp()">▲</button>
-                        <button id="downButton" class="control-switch" onclick="temperatureDown()">▼</button>
-                    </div>
-                </div>
+                <table>
+                    <caption>Thermostat</caption>
+                    <tr>
+                        <th rowspan="2">
+                            <span id="thermostatSetting"></span>
+                        </th>
+                        <td>
+                            <button id="upButton" class="control-switch" onclick="temperatureUp()">▲</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <button id="downButton" class="control-switch" onclick="temperatureDown()">▼</button>
+                        </td>
+                    </tr>
+                </table>
             </div>
             <div>
-                <h4>Environment</h4>
-                <div class="display-state">
-                    <span>Temperature:</span>
-                    <span id="temperatureReading"></span>
-                </div>
-                <div class="display-state">
-                    <span>Heat Index:</span>
-                    <span id="heatIndexReading"></span>
-                    <span id="comfortStatusEmoji"></span>
-                </div>
-                <div class="display-state">
-                    <span>Humidity:</span>
-                    <span id="humidityReading"></span>
-                </div>
-                <div class="display-state">
-                    <span>Dew Point:</span>
-                    <span id="dewPointReading"></span>
-                </div>
+                <table>
+                    <caption>Environment</caption>
+                    <tr>
+                        <th>Temperature:</th>
+                        <td>
+                            <span id="temperatureReading"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Feels Like:</th>
+                        <td>
+                            <span id="heatIndexReading"></span>
+                            <span id="comfortStatusEmoji"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Humidity:</th>
+                        <td>
+                            <span id="humidityReading"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Dew Point:</th>
+                        <td>
+                            <span id="dewPointReading"></span>
+                        </td>
+                    </tr>
+                </table>
             </div>
         </div>
 <script>
