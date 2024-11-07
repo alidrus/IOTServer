@@ -7,63 +7,80 @@
         <meta charset="UTF-8">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Economica:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
         <style>
-            html {
-                font-family: Helvetica;
-                display: inline-block;
-                margin: 0px auto;
-                text-align: center;
-            }
+             .economica-regular {
+                font-family: "Economica", sans-serif;
+                font-weight: 400;
+                font-style: normal;
+             }
+             .economica-bold {
+                font-family: "Economica", sans-serif;
+                font-weight: 700;
+                font-style: normal;
+             }
+             .economica-regular-italic {
+                font-family: "Economica", sans-serif;
+                font-weight: 400;
+                font-style: italic;
+             }
+             .economica-bold-italic {
+                font-family: "Economica", sans-serif;
+                font-weight: 700;
+                font-style: italic;
+             }
             .columns {
                 display: flex;
                 flex-direction: row;
                 justify-content: center;
                 align-items: flex-start;
+                flex-wrap: wrap;
             }
             .columns > div {
                 margin: 20px;
+                border: 2px solid #333399;
+                border-radius: 8px;
             }
             html {
-                font-family: "Audiowide", sans-serif;
+                font-family: "Economica", sans-serif;
+                font-weight: 400;
+                font-style: normal;
             }
             caption {
+                color: #3366cc;
+                font-family: "Economica", sans-serif;
+                font-weight: 700;
+                font-style: normal;
+                font-size: 18pt;
                 text-align: center;
-                font-weight: bold;
-                font-size: 14pt;
             }
             th {
-                text-align: right;
-                font-weight: bold;
+                font-family: "Economica", sans-serif;
+                font-weight: 700;
+                font-style: normal;
                 font-size: 12pt;
+                text-align: right;
+                width: 80px;
             }
             td {
-                text-align: left;
-                font-weight: normal;
+                font-family: "Economica", sans-serif;
+                font-weight: 400;
+                font-style: normal;
                 font-size: 12pt;
+                text-align: center;
+                width: 80px;
+            }
+            .button-cell {
+                text-align: center !important;
+            }
+            .comfort-status-emoji {
+                text-align: center;
+                font-size: 32pt;
             }
         </style>
     </head>
-    <body>
+    <body class="economica-regular">
         <div class="columns">
-            <div>
-                <table>
-                    <caption>Thermostat</caption>
-                    <tr>
-                        <th rowspan="2">
-                            <span id="thermostatSetting"></span>
-                        </th>
-                        <td>
-                            <button id="upButton" class="control-switch" onclick="temperatureUp()">▲</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <button id="downButton" class="control-switch" onclick="temperatureDown()">▼</button>
-                        </td>
-                    </tr>
-                </table>
-            </div>
             <div>
                 <table>
                     <caption>Environment</caption>
@@ -77,7 +94,6 @@
                         <th>Feels Like:</th>
                         <td>
                             <span id="heatIndexReading"></span>
-                            <span id="comfortStatusEmoji"></span>
                         </td>
                     </tr>
                     <tr>
@@ -90,6 +106,26 @@
                         <th>Dew Point:</th>
                         <td>
                             <span id="dewPointReading"></span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div id="comfortStatusEmoji" class="comfort-status-emoji">
+            </div>
+            <div>
+                <table>
+                    <caption>Thermostat</caption>
+                    <tr>
+                        <th rowspan="2">
+                            <span id="thermostatSetting"></span>
+                        </th>
+                        <td class="button-cell">
+                            <button id="upButton" class="control-switch" onclick="temperatureUp()">▲</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="button-cell">
+                            <button id="downButton" class="control-switch" onclick="temperatureDown()">▼</button>
                         </td>
                     </tr>
                 </table>
