@@ -1,14 +1,24 @@
 # IOTServer
+
+
 ## Climate Control Web Interface
+
+IOTServer started out as a simple POC (Proof Of Concept) pet project to turn an
+LED on and off using a web interface. However, since that does nothing really
+useful, I decided to expand it into a Climate Control server.
 
 
 ### Introduction
 
-ESP32 is a series of low-cost, low-power system-on-chip microcontrollers with integrated Wi-Fi and dual-mode Bluetooth.
-(Source: [Wikipedia entry](https://en.wikipedia.org/wiki/ESP32)). It provides a
-fairly low cost entry into the field of IoT.
+ESP32 is a series of low-cost, low-power system-on-chip microcontrollers with
+integrated Wi-Fi and dual-mode Bluetooth
+(Source: [Wikipedia entry](https://en.wikipedia.org/wiki/ESP32)).
+It provides a fairly low cost entry into the field of *IoT*.
 
-This project creates a fairly low cost solution to control an air conditioner to prevent the compressor from running non-stop and consumig excessive electricity.
+This project creates a fairly low cost solution to control an air conditioner
+to prevent the compressor from running non-stop and consuming excessive
+electricity.
+
 
 ### Requirements
 
@@ -17,32 +27,58 @@ In order to compile and run this test, you will need:
 * [ESP32 microcontroller board](https://www.espressif.com/en/products/socs/esp32)
 * [Arduino IDE](https://www.arduino.cc/en/Main/Software) or [Arduino CLI](https://github.com/arduino/arduino-cli)
 
-If you want to make changes to the HTML or JS served by the IOTServer, you will
-need [NodeJS](https://nodejs.org/en/) installed in order to run the *printify*
-script which will produce code you can copy and paste into  *IOTServer.ino*.
 
+### Building IndexHtml.h
 
-### Making Changes to HTML and JS
+You may have noticed that when you try to compile the code, that IndexHtml.h is missing:
 
-If you wish to make changes to the HTML and/or JS served by the web server, you
-will need to edit the files *web/page.html* and *web/page.js* and then run
-`./printify` to convert it into minified code embedded in a `client.println()`
-statement.
+```
+pushd web && ./integrate && popd
+~/Personal/IOTServer/web ~/Personal/IOTServer
+node:internal/modules/cjs/loader:1242
+  throw err;
+  ^
 
-In order to change the contents of the page you will need to edit
-*IOTServer.ino* and replace the line that comes directly after the following
-comment:
-```cpp
-    // Serve the HTML page
+Error: Cannot find module 'html-minifier'
+Require stack:
+- /home/user/Personal/IOTServer/web/integrate
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1239:15)
+    at Module._load (node:internal/modules/cjs/loader:1065:27)
+    at Module.require (node:internal/modules/cjs/loader:1325:19)
+    at require (node:internal/modules/helpers:179:18)
+    at Object.<anonymous> (/home/user/Personal/IOTServer/web/integrate:5:22)
+    at Module._compile (node:internal/modules/cjs/loader:1483:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1562:10)
+    at Module.load (node:internal/modules/cjs/loader:1302:32)
+    at Module._load (node:internal/modules/cjs/loader:1118:12)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:174:12) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [ '/home/user/Personal/IOTServer/web/integrate' ]
+}
+
+Node.js v20.18.0
+make: *** [Makefile:14: IndexHtml.h] Error 1
 ```
 
+In order to build `IndexHtml.h`, you will need [NodeJS](https://nodejs.org/en/)
+and either `npm` or `yarn` installed so that you can install the dependencies:
 
-### Uploading To NodeMCU
+Using `npm`:
+```
+cd web
+npm install
+```
 
-When you are ready to run the code on the NodeMCU, you can compile and
-upload it using Arduino IDE. If you have `arduino-cli` installed you can simply
-run `make upload` on the command-line and the code will be uploaded to the
-NodeMCU.
+Using `yarn`:
+```
+cd web
+npm install
+```
 
-If your NodeMCU serial device is not found you may need to edit the *Makefile*
-and change `/dev/tty.usbserial-1410` to the exact device your system detects.
+From then on you should be able to and compile everything.
+
+
+### Compiling
+
+
+### Uploading To ESP32
