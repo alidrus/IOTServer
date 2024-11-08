@@ -2,7 +2,7 @@
 
 
 # IOTServer
-## Proof Of Concept
+## Climate Control Web Interface
 
 ![Screenshot 1](/images/screenshot1.png)
 ![Screenshot 2](/images/screenshot2.png)
@@ -10,23 +10,17 @@
 
 ### Introduction
 
-The ESP8266 is a low-cost Wi-Fi microchip, with a full TCP/IP stack and
-microcontroller capability, produced by Espressif Systems in Shanghai, China
-(Source: [Wikipedia](https://en.wikipedia.org/wiki/ESP8266)). It provides a
+ESP32 is a series of low-cost, low-power system-on-chip microcontrollers with integrated Wi-Fi and dual-mode Bluetooth.
+(Source: [Wikipedia entry](https://en.wikipedia.org/wiki/ESP32)). It provides a
 fairly low cost entry into the field of IoT.
 
-The purpose of this POC (Proof Of Concept) is to demonstrate a fast Web Server
-running on the ESP8266 that is able to control a switch. Since we're not
-interested in complicated wiring diagrams for this experiment, we will instead
-use the built-in LED of the NodeMCU and imagine that to be a light (or some
-other device you would like to control using IoT).
-
+This project creates a fairly low cost solution to control an air conditioner to prevent the compressor from running non-stop and consumig excessive electricity.
 
 ### Requirements
 
 In order to compile and run this test, you will need:
-* Mac OS or Linux (I have only tested this on Mac OS)
-* [NodeMCU v3 Wireless WiFi Module](http://www.nodemcu.com/index_en.html)
+* Mac OS or Linux (I have only tested this on an Ubuntu 24.04 machine)
+* [ESP32 microcontroller board](https://www.espressif.com/en/products/socs/esp32)
 * [Arduino IDE](https://www.arduino.cc/en/Main/Software) or [Arduino CLI](https://github.com/arduino/arduino-cli)
 
 If you want to make changes to the HTML or JS served by the IOTServer, you will
