@@ -36,7 +36,7 @@ IRsend irsend(irPin);
 static const char* okResponse = "HTTP/1.1 200 OK";
 static const char* contentHeaderJson = "Content-Type: application/json";
 static const char* contentHeaderHtml = "Content-Type: text/html";
-static const char* environmentResponse = "{\"ts\": %.1f, \"t\": %.1f, \"h\": %.1f, \"hi\": %.1f, \"dp\": %.1f, \"cs\": \"%s\"}";
+static const char* environmentResponse = "{\"ts\": \"%.1f\", \"t\": \"%.1f\", \"h\": \"%.1f\", \"hi\": \"%.1f\", \"dp\": \"%.1f\", \"cs\": \"%s\"}";
 
 static const char* hostname = "iotserver";
 static const char* ssid = "Doudou-IoT";
