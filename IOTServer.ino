@@ -194,9 +194,9 @@ void setup() {
         if (dht.getStatus() != 0) {
             request->send(503, "text/plain", "Service unavailable");
         } else {
-            float heatIndex = dht.computeHeatIndex(dhtValues.temperature - 1, dhtValues.humidity);
-            float dewPoint = dht.computeDewPoint(dhtValues.temperature - 1, dhtValues.humidity);
-            float cr = dht.getComfortRatio(cf, dhtValues.temperature - 1, dhtValues.humidity);
+            float heatIndex = dht.computeHeatIndex(dhtValues.temperature - 2, dhtValues.humidity);
+            float dewPoint = dht.computeDewPoint(dhtValues.temperature - 2, dhtValues.humidity);
+            float cr = dht.getComfortRatio(cf, dhtValues.temperature - 2, dhtValues.humidity);
 
             String comfortStatus;
 
@@ -233,7 +233,7 @@ void setup() {
                     break;
             };
 
-            sprintf(stringBuffer, environmentResponse, thermostatSetting, dhtValues.temperature - 1, dhtValues.humidity, heatIndex, dewPoint, comfortStatus);
+            sprintf(stringBuffer, environmentResponse, thermostatSetting, dhtValues.temperature - 2, dhtValues.humidity, heatIndex, dewPoint, comfortStatus);
             request->send(200, "application/json", stringBuffer);
         }
     });
