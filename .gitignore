@@ -2,6 +2,7 @@
 build/
 web/node_modules/
 web/yarn.lock
+IndexHtml.h
 web/index.min.html
 web/index.min.css
 web/index.min.js
