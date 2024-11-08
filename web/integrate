@@ -1,9 +1,86 @@
-#!/usr/bin/env bash
-#
-# vim: syntax=sh expandtab tabstop=4 shiftwidth=4 softtabstop=4:
-#
+#!/usr/bin/env node
 
-cd `dirname $0`
-html-minifier --collapse-whitespace --remove-comments --minify-css true --minify-js true index.html -o index.min.html
-./printify | tee ../IndexHtml.h >& /dev/null
-rm -f index.min.html
+const fs = require('fs');
+const path = require('path');
+const htmlMinifier = require('html-minifier').minify;
+const uglifyJS = require('uglify-js');
+const CleanCSS = require('clean-css');
+
+// Input files to minify
+const inputFiles = [
+    {
+        filename: 'index.html',
+        type: 'html',
+        variableName: 'indexHtml',
+    },
+    {
+        filename: 'index.css',
+        type: 'css',
+        variableName: 'indexCss',
+    },
+    {
+        filename: 'index.js',
+        type: 'js',
+        variableName: 'indexJs',
+    },
+];
+
+// Minify HTML
+const minifyHTML = (inputFile) => {
+    const content = fs.readFileSync(inputFile.filename, 'utf-8');
+
+    const minifiedContent = htmlMinifier(content, {
+        removeComments: true,
+        collapseWhitespace: true,
+    });
+
+    return String(minifiedContent).replace(/\"/g, '\\"');
+};
+
+// Minify JavaScript
+const minifyJS = (inputFile) => {
+    const content = fs.readFileSync(inputFile.filename, 'utf-8');
+
+    const minifiedContent = uglifyJS.minify(content);
+
+    if (minifiedContent.error) {
+        console.error('Error minifying JavaScript:', minifiedJS.error);
+        return null;
+    }
+
+    return String(minifiedContent.code).replace(/\"/g, '\\"');
+};
+
+// Minify CSS
+const minifyCSS = (inputFile) => {
+    const content = fs.readFileSync(inputFile.filename, 'utf-8');
+
+    const minifiedContent = (new CleanCSS()).minify(content);
+
+    return String(minifiedContent.styles).replace(/\"/g, '\\"');
+};
+
+let indexHtmlContent = '';
+
+// Run all minification functions
+inputFiles.forEach((inputFile) => {
+    if (inputFile.type === 'html') {
+        indexHtmlContent += 'static const char* ' + inputFile.variableName + ' = "' + minifyHTML(inputFile) + '"\n\n';
+    }
+
+    if (inputFile.type === 'css') {
+        indexHtmlContent += 'static const char* ' + inputFile.variableName + ' = "' + minifyCSS(inputFile) + '"\n\n';
+    }
+
+    if (inputFile.type === 'js') {
+        indexHtmlContent += 'static const char* ' + inputFile.variableName + ' = "' + minifyJS(inputFile) + '"\n';
+    }
+});
+
+const outputFilePath = path.join(__dirname, '../IndexHtml.h');
+
+fs.writeFileSync(outputFilePath, indexHtmlContent, 'utf-8');
+
+console.log(`Generated file saved to ${outputFilePath}`);
+
+// vim: syntax=javascript expandtab tabstop=4 shiftwidth=4 softtabstop=4:
