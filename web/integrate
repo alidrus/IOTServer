@@ -65,15 +65,15 @@ let indexHtmlContent = '';
 // Run all minification functions
 inputFiles.forEach((inputFile) => {
     if (inputFile.type === 'html') {
-        indexHtmlContent += 'static const char* ' + inputFile.variableName + ' = "' + minifyHTML(inputFile) + '"\n\n';
+        indexHtmlContent += 'static const char* ' + inputFile.variableName + ' = "' + minifyHTML(inputFile) + '";\n\n';
     }
 
     if (inputFile.type === 'css') {
-        indexHtmlContent += 'static const char* ' + inputFile.variableName + ' = "' + minifyCSS(inputFile) + '"\n\n';
+        indexHtmlContent += 'static const char* ' + inputFile.variableName + ' = "' + minifyCSS(inputFile) + '";\n\n';
     }
 
     if (inputFile.type === 'js') {
-        indexHtmlContent += 'static const char* ' + inputFile.variableName + ' = "' + minifyJS(inputFile) + '"\n';
+        indexHtmlContent += 'static const char* ' + inputFile.variableName + ' = "' + minifyJS(inputFile) + '";\n';
     }
 });
 
