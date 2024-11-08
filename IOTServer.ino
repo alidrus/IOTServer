@@ -173,6 +173,18 @@ void setup() {
         request->send(200, "text/html; charset=UTF-8", indexHtml);
     });
 
+    // Increase temperature
+    server.on("/temperature/up", HTTP_GET, [] (AsyncWebServerRequest *request) {
+        thermostatSetting += 0.5;
+        request->send(200, "text/plain", "OK");
+    });
+
+    // Decrease temperature
+    server.on("/temperature/down", HTTP_GET, [] (AsyncWebServerRequest *request) {
+        thermostatSetting -= 0.5;
+        request->send(200, "text/plain", "OK");
+    });
+
     // Route for GET request to /tx/cooling
     server.on("/mode/cooling", HTTP_GET, [] (AsyncWebServerRequest *request) {
         // Send txCoolingMode
