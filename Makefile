@@ -20,7 +20,7 @@ upload: $(ELF)
 	arduino-cli upload --verbose -b $(FQBN) -p $(SERIAL_DEV) --input-dir $(BUILD_PATH)
 
 clean:
-	rm -vfr $(BUILD_PATH)/*
+	rm -vfr $(BUILD_PATH)/* IndexHtml.h
 
 monitor:
 	minicom --device=$(SERIAL_DEV) --baudrate=$(BAUD_RATE)
