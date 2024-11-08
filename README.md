@@ -4,9 +4,6 @@
 # IOTServer
 ## Climate Control Web Interface
 
-![Screenshot 1](/images/screenshot1.png)
-![Screenshot 2](/images/screenshot2.png)
-
 
 ### Introduction
 
