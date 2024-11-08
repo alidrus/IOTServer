@@ -1,0 +1,15 @@
+{
+  "name": "iotserver-web",
+  "version": "1.0.0",
+  "description": "Files to be served by IOTServer",
+  "main": "integrate.js",
+  "author": "Abu Bakar Al-Idrus",
+  "license": "MIT",
+  "repository": "https://github.com/alidrus/IOTServer",
+  "private": true,
+  "devDependencies": {
+    "clean-css": "^5.3.3",
+    "html-minifier": "^4.0.0",
+    "uglify-js": "^3.19.3"
+  }
+}
