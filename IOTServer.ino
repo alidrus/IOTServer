@@ -173,6 +173,24 @@ void setup() {
         request->send(200, "text/html; charset=UTF-8", indexHtml);
     });
 
+    // Route for root /index.html
+    server.on("/index.html", HTTP_GET, [](AsyncWebServerRequest *request) {
+        Serial.println("REQUEST: /index.html");
+        request->send(200, "text/html; charset=UTF-8", indexHtml);
+    });
+
+    // Route for root /index.css
+    server.on("/index.css", HTTP_GET, [](AsyncWebServerRequest *request) {
+        Serial.println("REQUEST: /index.css");
+        request->send(200, "text/css; charset=UTF-8", indexCss);
+    });
+
+    // Route for root /index.css
+    server.on("/index.js", HTTP_GET, [](AsyncWebServerRequest *request) {
+        Serial.println("REQUEST: /index.js");
+        request->send(200, "text/javascript; charset=UTF-8", indexJs);
+    });
+
     // Increase temperature
     server.on("/temperature/up", HTTP_GET, [] (AsyncWebServerRequest *request) {
         thermostatSetting += 0.5;
