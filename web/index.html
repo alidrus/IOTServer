@@ -49,10 +49,18 @@
             }
 
             .comfort-status-emoji {
-                text-align: center;
-                font-size: 36pt;
                 border: 0 !important;
                 flex-grow: 0 !important;
+            }
+
+            .comfort-status-emoji > div {
+                text-align: center;
+                font-size: 14pt;
+            }
+
+            .comfort-status-emoji > div:first-child {
+                text-align: center;
+                font-size: 36pt;
             }
 
             html {
@@ -88,7 +96,7 @@
                 font-weight: 500;
                 font-style: normal;
                 font-size: 14pt;
-                text-align: center;
+                text-align: left;
                 width: 50%;
             }
 
@@ -121,7 +129,10 @@
                     </tr>
                 </table>
             </div>
-            <div id="comfortStatusEmoji" class="comfort-status-emoji"></div>
+            <div class="comfort-status-emoji">
+                <div id="comfortStatusEmoji"></div>
+                <div id="comfortStatusText"></div>
+            </div>
             <div>
                 <table>
                     <caption>Environment</caption>
@@ -213,7 +224,9 @@ const updateStatus = function (responseText) {
 
     if (Object.hasOwn(statusObj.environment, 'cs')) {
         const csObj = document.getElementById('comfortStatusEmoji');
+        const cstObj = document.getElementById('comfortStatusText');
         csObj.innerText = Object.hasOwn(csEmoji, statusObj.environment.cs) ? csEmoji[statusObj.environment.cs] : '?';
+        cstObj.innerText = statusObj.environment.cs.replace(/([A-Z])/g, ' $1').trim();
     }
 };
 
