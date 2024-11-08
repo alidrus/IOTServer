@@ -14,21 +14,25 @@
                 font-weight: 400;
                 font-style: normal;
              }
+
              .economica-bold {
                 font-family: "Economica", sans-serif;
                 font-weight: 700;
                 font-style: normal;
              }
+
              .economica-regular-italic {
                 font-family: "Economica", sans-serif;
                 font-weight: 400;
                 font-style: italic;
              }
+
              .economica-bold-italic {
                 font-family: "Economica", sans-serif;
                 font-weight: 700;
                 font-style: italic;
              }
+
             .columns {
                 display: flex;
                 flex-direction: row;
@@ -36,16 +40,31 @@
                 align-items: flex-start;
                 flex-wrap: wrap;
             }
+
             .columns > div {
                 margin: 20px;
                 border: 2px solid #333399;
                 border-radius: 8px;
+                flex-grow: 1;
             }
+
+            .comfort-status-emoji {
+                text-align: center;
+                font-size: 36pt;
+                border: 0 !important;
+                flex-grow: 0 !important;
+            }
+
             html {
                 font-family: "Economica", sans-serif;
                 font-weight: 400;
                 font-style: normal;
             }
+
+            table {
+                width: 98%;
+            }
+
             caption {
                 color: #3366cc;
                 font-family: "Economica", sans-serif;
@@ -54,31 +73,29 @@
                 font-size: 18pt;
                 text-align: center;
             }
+
             th {
                 font-family: "Economica", sans-serif;
                 font-weight: 700;
                 font-style: normal;
-                font-size: 12pt;
+                font-size: 14pt;
                 text-align: right;
-                width: 80px;
+                width: 50%;
             }
+
             td {
                 font-family: "Economica", sans-serif;
-                font-weight: 400;
+                font-weight: 500;
                 font-style: normal;
-                font-size: 12pt;
+                font-size: 14pt;
                 text-align: center;
-                width: 80px;
+                width: 50%;
             }
+
             .button-cell {
                 text-align: center !important;
             }
-            .comfort-status-emoji {
-                text-align: center;
-                font-size: 36pt;
-                width: 200px !important;
-                border: 0 !important;
-            }
+
             .thermostat-setting {
                 font-size: 18pt;
             }
@@ -86,6 +103,25 @@
     </head>
     <body class="economica-regular">
         <div class="columns">
+            <div>
+                <table>
+                    <caption>Thermostat</caption>
+                    <tr>
+                        <th rowspan="2">
+                            <span id="thermostatSetting" class="thermostat-setting"></span>
+                        </th>
+                        <td class="button-cell">
+                            <button id="upButton" class="control-switch" onclick="temperatureUp()">▲</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="button-cell">
+                            <button id="downButton" class="control-switch" onclick="temperatureDown()">▼</button>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div id="comfortStatusEmoji" class="comfort-status-emoji"></div>
             <div>
                 <table>
                     <caption>Environment</caption>
@@ -111,25 +147,6 @@
                         <th>Dew Point:</th>
                         <td>
                             <span id="dewPointReading"></span>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-            <div id="comfortStatusEmoji" class="comfort-status-emoji"></div>
-            <div>
-                <table>
-                    <caption>Thermostat</caption>
-                    <tr>
-                        <th rowspan="2">
-                            <span id="thermostatSetting" class="thermostat-setting"></span>
-                        </th>
-                        <td class="button-cell">
-                            <button id="upButton" class="control-switch" onclick="temperatureUp()">▲</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="button-cell">
-                            <button id="downButton" class="control-switch" onclick="temperatureDown()">▼</button>
                         </td>
                     </tr>
                 </table>
