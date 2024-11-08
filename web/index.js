@@ -81,6 +81,7 @@ const ajaxCall = () => {
     xhttp.send();
 };
 
+// send temperature up command to the server
 const temperatureUp = () => {
     if (statusObj.temperatureAdjustmentInProgress) {
         return;
@@ -105,6 +106,7 @@ const temperatureUp = () => {
     xhttp.send();
 };
 
+// send temperature down command to the server
 const temperatureDown = () => {
     if (statusObj.temperatureAdjustmentInProgress) {
         return;
@@ -149,3 +151,7 @@ window.onload = () => {
 window.onbeforeunload = () => {
     clearInterval(ids.refreshInterval);
 };
+
+// Expose temperatureUp and temperatureDown to the global scope
+window.temperatureUp = temperatureUp;
+window.temperatureDown = temperatureDown;
