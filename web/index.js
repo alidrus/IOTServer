@@ -81,11 +81,16 @@ const ajaxCall = () => {
     xhttp.send();
 };
 
+const temperatureAdjustmentFlag = (state) => {
+};
+
 // send temperature up command to the server
 const temperatureUp = () => {
     if (statusObj.temperatureAdjustmentInProgress) {
         return;
     }
+
+    statusObj.temperatureAdjustmentInProgress = true;
 
     const url = '/temperature/up';
 
@@ -99,8 +104,6 @@ const temperatureUp = () => {
         statusObj.temperatureAdjustmentInProgress = false;
     };
 
-    statusObj.temperatureAdjustmentInProgress = true;
-
     xhttp.open('GET', url, true);
 
     xhttp.send();
@@ -111,6 +114,8 @@ const temperatureDown = () => {
     if (statusObj.temperatureAdjustmentInProgress) {
         return;
     }
+
+    statusObj.temperatureAdjustmentInProgress = true;
 
     const url = '/temperature/down';
 
@@ -123,8 +128,6 @@ const temperatureDown = () => {
 
         statusObj.temperatureAdjustmentInProgress = false;
     };
-
-    statusObj.temperatureAdjustmentInProgress = true;
 
     xhttp.open('GET', url, true);
 

@@ -7,6 +7,7 @@
 #include <DHTesp.h>
 #include <IRremote.h>
 #include "IndexHtml.h"
+#include "Hysteresis.h"
 
 // Comment this line out if you don't want serial console messages
 //#define DEBUG_MODE
@@ -14,12 +15,9 @@
 // Infrared remote carrier frequency
 #define IR_CARRIER_FREQUENCY  38
 
-
 int dhtPin = 17;
 
 int irPin = 4;
-
-float thermostatSetting = 27;
 
 WiFiUDP ntpUDP;
 
@@ -280,6 +278,10 @@ void setup() {
     // DEBUG messages on serial console
     Serial.println("Server started");
 #endif
+
+    // First run of ntp update (time sync)
+    lastSyncTime = millis();
+    timeClient.update();
 }
 
 void loop() {
@@ -289,8 +291,8 @@ void loop() {
         wifiSetup();
     }
 
-    // Run ntp update every 1 seconds
-    if ((timeElapsed - lastSyncTime) >= 1000) {
+    // Run ntp update every 60 seconds
+    if ((timeElapsed - lastSyncTime) >= 60000) {
         lastSyncTime = timeElapsed;
         timeClient.update();
     }
