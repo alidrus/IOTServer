@@ -191,13 +191,13 @@ void setup() {
 
     // Increase temperature
     server.on("/temperature/up", HTTP_GET, [] (AsyncWebServerRequest *request) {
-        thermostatSetting += 0.5;
+        heatIndexTarget += 0.5;
         request->send(200, "text/plain", "OK");
     });
 
     // Decrease temperature
     server.on("/temperature/down", HTTP_GET, [] (AsyncWebServerRequest *request) {
-        thermostatSetting -= 0.5;
+        heatIndexTarget -= 0.5;
         request->send(200, "text/plain", "OK");
     });
 
@@ -261,7 +261,7 @@ void setup() {
                     break;
             };
 
-            sprintf(stringBuffer, environmentResponse, thermostatSetting, dhtValues.temperature - 2, dhtValues.humidity, heatIndex, dewPoint, comfortStatus);
+            sprintf(stringBuffer, environmentResponse, heatIndexTarget, dhtValues.temperature - 2, dhtValues.humidity, heatIndex, dewPoint, comfortStatus);
             request->send(200, "application/json", stringBuffer);
         }
     });
