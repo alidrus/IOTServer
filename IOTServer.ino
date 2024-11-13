@@ -5,19 +5,14 @@
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <DHTesp.h>
-#include <IRremote.h>
 #include "IndexHtml.h"
 #include "Hysteresis.h"
+#include "CompressorControl.h"
 
 // Comment this line out if you don't want serial console messages
 //#define DEBUG_MODE
 
-// Infrared remote carrier frequency
-#define IR_CARRIER_FREQUENCY  38
-
 int dhtPin = 17;
-
-int irPin = 4;
 
 WiFiUDP ntpUDP;
 
@@ -29,7 +24,7 @@ DHTesp dht;
 
 ComfortState cf;
 
-IRsend irsend(irPin);
+Hysteresis climateControl;
 
 static const char* okResponse = "HTTP/1.1 200 OK";
 static const char* contentHeaderJson = "Content-Type: application/json";
@@ -37,60 +32,10 @@ static const char* contentHeaderHtml = "Content-Type: text/html";
 static const char* environmentResponse = "{\"ts\": \"%.1f\", \"t\": \"%.1f\", \"h\": \"%.1f\", \"hi\": \"%.1f\", \"dp\": \"%.1f\", \"cs\": \"%s\"}";
 
 static const char* hostname = "iotserver";
-static const char* ssid = "Doudou-IoT";
+static const char* ssid = "BombomNet";
 static const char* password = "0123206635";
 
 unsigned long lastSyncTime = millis();
-
-// Raw IR timings
-const uint16_t txPowerToggle[] = {
-    9788, 9676, 9812, 9680, 4652, 2408, 432, 296, 436, 868,
-    436, 868, 432, 296, 432, 872, 432, 296, 436, 296,
-    432, 296, 432, 300, 432, 296, 432, 868, 436, 296,
-    432, 296, 436, 868, 432, 300, 432, 296, 436, 292,
-    432, 872, 432, 296, 436, 296, 432, 296, 432, 296,
-    436, 868, 436, 296, 432, 868, 436, 296, 432, 872,
-    432, 296, 432, 300, 432, 292, 436, 296, 432, 300,
-    432, 296, 432, 296, 436, 296, 432, 296, 436, 864,
-    436, 296, 436, 296, 432, 296, 432, 300, 432, 296,
-    432, 296, 436, 296, 432, 868, 436, 296, 432, 296,
-    436, 296, 432, 296, 432, 296, 436, 1100, 204, 292,
-    436, 296, 432, 868, 436, 296, 432, 300, 432, 868,
-    432, 300, 432, 868, 436, 868, 432, 868, 436, 296,
-    432, 868, 436, 868, 436, 20048, 4652
-};
-const uint16_t txFanMode[] = {
-    9788, 9676, 9816, 9676, 4656, 2404, 436, 296, 436, 864,
-    436, 868, 436, 296, 432, 868, 436, 328, 404, 288,
-    440, 296, 432, 296, 436, 292, 436, 868, 436, 296,
-    432, 296, 436, 864, 436, 296, 436, 296, 436, 324,
-    404, 864, 436, 868, 436, 296, 432, 868, 436, 868,
-    436, 296, 432, 296, 436, 864, 436, 296, 436, 864,
-    440, 292, 436, 296, 432, 296, 436, 328, 400, 328,
-    404, 292, 436, 296, 432, 296, 436, 296, 432, 868,
-    436, 296, 432, 296, 436, 292, 436, 292, 436, 296,
-    436, 296, 432, 296, 436, 864, 436, 296, 436, 328,
-    400, 296, 436, 868, 432, 868, 436, 868, 436, 292,
-    436, 296, 432, 872, 432, 328, 404, 292, 436, 868,
-    436, 296, 432, 868, 436, 296, 432, 868, 436, 868,
-    436, 292, 436, 868, 436, 20044, 4656
-};
-const uint16_t txCoolingMode[] = {
-    9788, 9680, 9812, 9680, 4652, 2408, 432, 300, 428, 868,
-    436, 868, 436, 300, 428, 872, 432, 296, 432, 300,
-    428, 300, 432, 300, 432, 868, 432, 300, 428, 300,
-    432, 300, 428, 872, 432, 300, 432, 296, 432, 300,
-    428, 300, 432, 868, 432, 300, 432, 300, 428, 300,
-    428, 872, 432, 300, 432, 868, 432, 300, 432, 868,
-    432, 300, 432, 300, 432, 296, 432, 296, 432, 300,
-    432, 296, 432, 300, 428, 300, 432, 296, 432, 872,
-    432, 300, 428, 300, 432, 300, 428, 300, 428, 300,
-    432, 300, 428, 300, 432, 868, 432, 300, 432, 296,
-    432, 300, 428, 304, 428, 300, 428, 872, 432, 300,
-    432, 300, 428, 868, 432, 300, 432, 296, 432, 872,
-    432, 300, 432, 868, 432, 300, 432, 868, 432, 300,
-    432, 868, 432, 300, 432, 20052, 4652
-};
 
 char stringBuffer[96];
 
@@ -191,27 +136,27 @@ void setup() {
 
     // Increase temperature
     server.on("/temperature/up", HTTP_GET, [] (AsyncWebServerRequest *request) {
-        heatIndexTarget += 0.5;
+        climateControl.incrementHeatIndexTarget();
         request->send(200, "text/plain", "OK");
     });
 
     // Decrease temperature
     server.on("/temperature/down", HTTP_GET, [] (AsyncWebServerRequest *request) {
-        heatIndexTarget -= 0.5;
+        climateControl.decrementHeatIndexTarget();
         request->send(200, "text/plain", "OK");
     });
 
     // Route for GET request to /tx/cooling
     server.on("/mode/cooling", HTTP_GET, [] (AsyncWebServerRequest *request) {
-        // Send txCoolingMode
-        irsend.sendRaw(txCoolingMode, sizeof(txCoolingMode) / sizeof(txCoolingMode[0]), IR_CARRIER_FREQUENCY);
+        // Activate cooling mode
+        turnCompressorOn();
         request->send(200, "text/plain", "OK");
     });
 
     // Route for GET request to /tx/fan
     server.on("/mode/fan", HTTP_GET, [] (AsyncWebServerRequest *request) {
-        // Send txFanMode
-        irsend.sendRaw(txFanMode, sizeof(txFanMode) / sizeof(txFanMode[0]), IR_CARRIER_FREQUENCY);
+        // Activate fan mode
+        turnCompressorOff();
         request->send(200, "text/plain", "OK");
     });
 
@@ -222,9 +167,10 @@ void setup() {
         if (dht.getStatus() != 0) {
             request->send(503, "text/plain", "Service unavailable");
         } else {
-            float heatIndex = dht.computeHeatIndex(dhtValues.temperature - 2, dhtValues.humidity);
-            float dewPoint = dht.computeDewPoint(dhtValues.temperature - 2, dhtValues.humidity);
-            float cr = dht.getComfortRatio(cf, dhtValues.temperature - 2, dhtValues.humidity);
+            const float heatIndexTarget = climateControl.getHeatIndexTarget();
+            const float heatIndex = dht.computeHeatIndex(dhtValues.temperature - 2, dhtValues.humidity);
+            const float dewPoint = dht.computeDewPoint(dhtValues.temperature - 2, dhtValues.humidity);
+            const float cr = dht.getComfortRatio(cf, dhtValues.temperature - 2, dhtValues.humidity);
 
             String comfortStatus;
 
