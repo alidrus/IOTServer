@@ -7,3 +7,4 @@ web/index.min.html
 web/index.min.css
 web/index.min.js
 *.swp
+Secrets.h
