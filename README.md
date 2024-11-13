@@ -1,5 +1,7 @@
 # IOTServer
 
+![Project Prototype](images/project.jpg "Prototype of IOTServer")
+
 
 ## Climate Control Web Interface
 
@@ -80,5 +82,9 @@ From then on you should be able to and compile everything.
 
 ### Compiling
 
+Compiling the project is as simple as running `make` (tested on Ubuntu 24.04).
+
 
 ### Uploading To ESP32
+
+Uploading to ESP32 is a simple matter of running `make upload` (tested on Ubuntu 24.04)
