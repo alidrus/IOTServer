@@ -5,9 +5,11 @@
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <DHTesp.h>
-#include "IndexHtml.h"
-#include "Hysteresis.h"
+
 #include "CompressorControl.h"
+#include "Hysteresis.h"
+#include "IndexHtml.h"
+#include "Secrets.h"
 
 // Comment this line out if you don't want serial console messages
 //#define DEBUG_MODE
@@ -31,10 +33,6 @@ static const char* contentHeaderJson = "Content-Type: application/json";
 static const char* contentHeaderHtml = "Content-Type: text/html";
 static const char* environmentResponse = "{\"ts\": \"%.1f\", \"t\": \"%.1f\", \"h\": \"%.1f\", \"hi\": \"%.1f\", \"dp\": \"%.1f\", \"cs\": \"%s\"}";
 
-static const char* hostname = "iotserver";
-static const char* ssid = "BombomNet";
-static const char* password = "0123206635";
-
 unsigned long lastSyncTime = millis();
 
 char stringBuffer[96];
@@ -46,13 +44,13 @@ void wifiSetup() {
     delay(1000);
 
     // Set hostname
-    WiFi.setHostname(hostname);
+    WiFi.setHostname(WIFI_HOSTNAME);
 
     // Set WiFi mode to station
     WiFi.mode(WIFI_STA);
 
     // WiFi credentials
-    WiFi.begin(ssid, password);
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
 #ifdef DEBUG_MODE
     // DEBUG messages on serial console
