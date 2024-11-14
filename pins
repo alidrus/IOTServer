@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+while [ ! "${DHT_PIN}" ]
+do
+    echo -n "Which pin is the DHT humidity and temperature sensor connected to? "
+    read DHT_PIN
+done
+
+while [ ! "${IR_PIN}" ]
+do
+    echo -n "Which pin is the infra-red LED connected to? "
+    read IR_PIN
+done
+
+echo "#define DHT_PIN ${DHT_PIN}
+#define IR_PIN ${IR_PIN}" > Pins.h
+
+# vim: syntax=sh expandtab tabstop=4 shiftwidth=4 softtabstop=4:
