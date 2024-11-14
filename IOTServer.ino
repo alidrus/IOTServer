@@ -9,12 +9,11 @@
 #include "CompressorControl.h"
 #include "Hysteresis.h"
 #include "IndexHtml.h"
+#include "Pins.h"
 #include "Secrets.h"
 
 // Comment this line out if you don't want serial console messages
 //#define DEBUG_MODE
-
-int dhtPin = 17;
 
 WiFiUDP ntpUDP;
 
@@ -27,6 +26,8 @@ DHTesp dht;
 ComfortState cf;
 
 Hysteresis climateControl;
+
+CompressorControl compressorController;
 
 static const char* okResponse = "HTTP/1.1 200 OK";
 static const char* contentHeaderJson = "Content-Type: application/json";
@@ -94,7 +95,7 @@ void setup() {
     Serial.begin(115200);
 #endif
 
-    dht.setup(dhtPin, DHTesp::DHT22);
+    dht.setup(DHT_PIN, DHTesp::DHT22);
 
     delay(1000);
 
@@ -134,27 +135,27 @@ void setup() {
 
     // Increase temperature
     server.on("/temperature/up", HTTP_GET, [] (AsyncWebServerRequest *request) {
-        climateControl.incrementHeatIndexTarget();
+        climateControl.incrementTargetHeatIndex();
         request->send(200, "text/plain", "OK");
     });
 
     // Decrease temperature
     server.on("/temperature/down", HTTP_GET, [] (AsyncWebServerRequest *request) {
-        climateControl.decrementHeatIndexTarget();
+        climateControl.decrementTargetHeatIndex();
         request->send(200, "text/plain", "OK");
     });
 
     // Route for GET request to /tx/cooling
     server.on("/mode/cooling", HTTP_GET, [] (AsyncWebServerRequest *request) {
         // Activate cooling mode
-        turnCompressorOn();
+        compressorController.turnCompressorOn();
         request->send(200, "text/plain", "OK");
     });
 
     // Route for GET request to /tx/fan
     server.on("/mode/fan", HTTP_GET, [] (AsyncWebServerRequest *request) {
         // Activate fan mode
-        turnCompressorOff();
+        compressorController.turnCompressorOff();
         request->send(200, "text/plain", "OK");
     });
 
@@ -165,7 +166,7 @@ void setup() {
         if (dht.getStatus() != 0) {
             request->send(503, "text/plain", "Service unavailable");
         } else {
-            const float heatIndexTarget = climateControl.getHeatIndexTarget();
+            const float targetHeatIndex = climateControl.getTargetHeatIndex();
             const float heatIndex = dht.computeHeatIndex(dhtValues.temperature - 2, dhtValues.humidity);
             const float dewPoint = dht.computeDewPoint(dhtValues.temperature - 2, dhtValues.humidity);
             const float cr = dht.getComfortRatio(cf, dhtValues.temperature - 2, dhtValues.humidity);
@@ -205,7 +206,7 @@ void setup() {
                     break;
             };
 
-            sprintf(stringBuffer, environmentResponse, heatIndexTarget, dhtValues.temperature - 2, dhtValues.humidity, heatIndex, dewPoint, comfortStatus);
+            sprintf(stringBuffer, environmentResponse, targetHeatIndex, dhtValues.temperature - 2, dhtValues.humidity, heatIndex, dewPoint, comfortStatus);
             request->send(200, "application/json", stringBuffer);
         }
     });
@@ -235,9 +236,15 @@ void loop() {
         wifiSetup();
     }
 
-    // Run ntp update every 60 seconds
+    // Run every 60 seconds
     if ((timeElapsed - lastSyncTime) >= 60000) {
         lastSyncTime = timeElapsed;
+
+        TempAndHumidity dhtValues = dht.getTempAndHumidity();
+        const float heatIndex = dht.computeHeatIndex(dhtValues.temperature - 2, dhtValues.humidity);
+
+        climateControl.monitorComfort(heatIndex);
+
         timeClient.update();
     }
 }
