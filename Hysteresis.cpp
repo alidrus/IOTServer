@@ -6,6 +6,10 @@
 #include "Hysteresis.h"
 
 void Hysteresis::monitorComfort(float currentHeatIndex) {
+    Serial.print("Hysteresis::monitorComfort(");
+    Serial.print(currentHeatIndex);
+    Serial.println(")");
+
     CompressorControl compressorController;
 
     const unsigned long currentTime = millis(); // Function to get current time in seconds
@@ -39,17 +43,27 @@ void Hysteresis::monitorComfort(float currentHeatIndex) {
 }
 
 float Hysteresis::getTargetHeatIndex() const {
+    Serial.println("Hysteresis::getTargetHeatIndex()");
+
     return this->targetHeatIndex;
 }
 
 void Hysteresis::setTargetHeatIndex(unsigned long targetHeatIndex) {
+    Serial.print("Hysteresis::setTargetHeatIndex(");
+    Serial.print(targetHeatIndex);
+    Serial.println(")");
+
     this->targetHeatIndex = targetHeatIndex;
 }
 
 void Hysteresis::incrementTargetHeatIndex() {
+    Serial.println("Hysteresis::incrementTargetHeatIndex()");
+
     this->targetHeatIndex += 0.5;
 }
 
 void Hysteresis::decrementTargetHeatIndex() {
+    Serial.println("Hysteresis::decrementTargetHeatIndex()");
+
     this->targetHeatIndex -= 0.5;
 }

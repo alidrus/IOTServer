@@ -13,7 +13,7 @@
 #include "Secrets.h"
 
 // Comment this line out if you don't want serial console messages
-//#define DEBUG_MODE
+#define DEBUG_MODE
 
 WiFiUDP ntpUDP;
 
@@ -35,6 +35,7 @@ static const char* contentHeaderHtml = "Content-Type: text/html";
 static const char* environmentResponse = "{\"ts\": \"%.1f\", \"t\": \"%.1f\", \"h\": \"%.1f\", \"hi\": \"%.1f\", \"dp\": \"%.1f\", \"cs\": \"%s\"}";
 
 unsigned long lastSyncTime = millis();
+unsigned long lastHysteresisTime = millis();
 
 char stringBuffer[96];
 
@@ -112,55 +113,73 @@ void setup() {
     // Route for root / web page
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
         Serial.println("REQUEST: /");
+
         request->send(200, "text/html; charset=UTF-8", indexHtml);
     });
 
     // Route for root /index.html
     server.on("/index.html", HTTP_GET, [](AsyncWebServerRequest *request) {
         Serial.println("REQUEST: /index.html");
+
         request->send(200, "text/html; charset=UTF-8", indexHtml);
     });
 
     // Route for root /index.css
     server.on("/index.css", HTTP_GET, [](AsyncWebServerRequest *request) {
         Serial.println("REQUEST: /index.css");
+
         request->send(200, "text/css; charset=UTF-8", indexCss);
     });
 
     // Route for root /index.css
     server.on("/index.js", HTTP_GET, [](AsyncWebServerRequest *request) {
         Serial.println("REQUEST: /index.js");
+
         request->send(200, "text/javascript; charset=UTF-8", indexJs);
     });
 
     // Increase temperature
     server.on("/temperature/up", HTTP_GET, [] (AsyncWebServerRequest *request) {
+        Serial.println("REQUEST: /temperature/up");
+
         climateControl.incrementTargetHeatIndex();
+
         request->send(200, "text/plain", "OK");
     });
 
     // Decrease temperature
     server.on("/temperature/down", HTTP_GET, [] (AsyncWebServerRequest *request) {
+        Serial.println("REQUEST: /temperature/down");
+
         climateControl.decrementTargetHeatIndex();
+
         request->send(200, "text/plain", "OK");
     });
 
     // Route for GET request to /tx/cooling
     server.on("/mode/cooling", HTTP_GET, [] (AsyncWebServerRequest *request) {
+        Serial.println("REQUEST: /mode/cooling");
+
         // Activate cooling mode
         compressorController.turnCompressorOn();
+
         request->send(200, "text/plain", "OK");
     });
 
     // Route for GET request to /tx/fan
     server.on("/mode/fan", HTTP_GET, [] (AsyncWebServerRequest *request) {
+        Serial.println("REQUEST: /mode/fan");
+
         // Activate fan mode
         compressorController.turnCompressorOff();
+
         request->send(200, "text/plain", "OK");
     });
 
     // Route for GET request to /temperature
     server.on("/environment", HTTP_GET, [](AsyncWebServerRequest *request) {
+        Serial.println("REQUEST: /environment");
+
         TempAndHumidity dhtValues = dht.getTempAndHumidity();
 
         if (dht.getStatus() != 0) {
@@ -240,11 +259,16 @@ void loop() {
     if ((timeElapsed - lastSyncTime) >= 60000) {
         lastSyncTime = timeElapsed;
 
+        timeClient.update();
+    }
+
+    // Run every 20 seconds
+    if ((timeElapsed - lastHysteresisTime) >= 20000) {
+        lastHysteresisTime = timeElapsed;
+
         TempAndHumidity dhtValues = dht.getTempAndHumidity();
         const float heatIndex = dht.computeHeatIndex(dhtValues.temperature - 2, dhtValues.humidity);
 
         climateControl.monitorComfort(heatIndex);
-
-        timeClient.update();
     }
 }

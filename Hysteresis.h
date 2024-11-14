@@ -15,7 +15,7 @@
 class Hysteresis
 {
     public:
-        Hysteresis(float targetHeatIndex = 26, float hysteresisBuffer = 0.5)
+        Hysteresis(float targetHeatIndex = 25, float hysteresisBuffer = 0.5)
         {
             this->targetHeatIndex = targetHeatIndex;
             this->hysteresisBuffer = hysteresisBuffer;
