@@ -4,7 +4,6 @@ const statusObj = {
     environment: null,
     ajaxCallInProgress: false,
     temperatureAdjustmentInProgress: false,
-    modeChangeInProgress: false,
 };
 
 const ids = {
@@ -135,56 +134,6 @@ const temperatureDown = () => {
     xhttp.send();
 };
 
-// send cooling mode command to the server
-const coolingMode = () => {
-    if (statusObj.modeChangeInProgress) {
-        return;
-    }
-
-    statusObj.modeChangeInProgress = true;
-
-    const url = '/mode/cooling';
-
-    const xhttp=new XMLHttpRequest();
-
-    xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-            updateStatus(this.responseText);
-        }
-
-        statusObj.modeChangeInProgress = false;
-    };
-
-    xhttp.open('GET', url, true);
-
-    xhttp.send();
-};
-
-// send fan mode command to the server
-const fanMode = () => {
-    if (statusObj.modeChangeInProgress) {
-        return;
-    }
-
-    statusObj.modeChangeInProgress = true;
-
-    const url = '/mode/fan';
-
-    const xhttp=new XMLHttpRequest();
-
-    xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-            updateStatus(this.responseText);
-        }
-
-        statusObj.modeChangeInProgress = false;
-    };
-
-    xhttp.open('GET', url, true);
-
-    xhttp.send();
-};
-
 // executed upon page loads
 window.onload = () => {
     ids.refreshInterval = setInterval(() => {
@@ -208,6 +157,4 @@ window.onbeforeunload = () => {
 
 // Expose temperatureUp and temperatureDown to the global scope
 window.temperatureUp = temperatureUp;
-window.coolingMode = coolingMode;
-window.fanMode = fanMode;
 window.temperatureDown = temperatureDown;
