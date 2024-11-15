@@ -6,7 +6,6 @@
 #include <ESPAsyncWebServer.h>
 #include <DHTesp.h>
 
-#include "CompressorControl.h"
 #include "Hysteresis.h"
 #include "IndexHtml.h"
 #include "Pins.h"
@@ -28,8 +27,6 @@ DHTesp dht;
 ComfortState cf;
 
 Hysteresis climateControl;
-
-CompressorControl compressorController;
 
 static const char* okResponse = "HTTP/1.1 200 OK";
 static const char* contentHeaderJson = "Content-Type: application/json";
@@ -154,26 +151,6 @@ void setup() {
         Serial.println("REQUEST: /temperature/down");
 
         climateControl.decrementTargetHeatIndex();
-
-        request->send(200, "text/plain", "OK");
-    });
-
-    // Route for GET request to /tx/cooling
-    server.on("/mode/cooling", HTTP_GET, [] (AsyncWebServerRequest *request) {
-        Serial.println("REQUEST: /mode/cooling");
-
-        // Activate cooling mode
-        compressorController.turnCompressorOn();
-
-        request->send(200, "text/plain", "OK");
-    });
-
-    // Route for GET request to /tx/fan
-    server.on("/mode/fan", HTTP_GET, [] (AsyncWebServerRequest *request) {
-        Serial.println("REQUEST: /mode/fan");
-
-        // Activate fan mode
-        compressorController.turnCompressorOff();
 
         request->send(200, "text/plain", "OK");
     });
