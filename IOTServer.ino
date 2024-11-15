@@ -12,6 +12,8 @@
 #include "Pins.h"
 #include "Secrets.h"
 
+#include <IRremote.hpp>
+
 // Comment this line out if you don't want serial console messages
 #define DEBUG_MODE
 

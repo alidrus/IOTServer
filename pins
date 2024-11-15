@@ -6,13 +6,13 @@ do
     read DHT_PIN
 done
 
-while [ ! "${IR_PIN}" ]
+while [ ! "${IR_SEND_PIN}" ]
 do
     echo -n "Which pin is the infra-red LED connected to? "
-    read IR_PIN
+    read IR_SEND_PIN
 done
 
 echo "#define DHT_PIN ${DHT_PIN}
-#define IR_PIN ${IR_PIN}" > Pins.h
+#define IR_SEND_PIN ${IR_SEND_PIN}" > Pins.h
 
 # vim: syntax=sh expandtab tabstop=4 shiftwidth=4 softtabstop=4:
