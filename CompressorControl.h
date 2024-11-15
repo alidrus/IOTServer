@@ -13,6 +13,8 @@
 
 class CompressorControl {
     public:
+        CompressorControl();
+
         void turnACOnOff();
 
         void turnCompressorOn();
