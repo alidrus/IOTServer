@@ -7,8 +7,6 @@
 #ifndef COMPRESSOR_CONTROL_H
 #define COMPRESSOR_CONTROL_H
 
-#define IR_CARRIER_FREQUENCY  38
-
 #include <Arduino.h>
 
 class CompressorControl {
