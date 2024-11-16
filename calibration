@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+while [ ! "${TEMPERATURE_CALIBRATION}" ]
+do
+    echo -n "Temperature calibration amount (e.g. 1.2f): "
+    read TEMPERATURE_CALIBRATION
+done
+
+echo "#define TEMPERATURE_CALIBRATION ${TEMPERATURE_CALIBRATION}" > Calibration.h
+
+# vim: syntax=sh expandtab tabstop=4 shiftwidth=4 softtabstop=4:
