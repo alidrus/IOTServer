@@ -8,7 +8,7 @@
 #define HYSTERESIS_H
 
 // Configurable limits
-#define MAX_RUN_TIME 600000                   // Max compressor run time in milliseconds (600,000 ms = 10 minutes)
+#define MAX_RUN_TIME 900000                   // Max compressor run time in milliseconds (900,000 ms = 15 minutes)
 #define MIN_REST_TIME 180000                  // Min compressor rest time in milliseconds (180,000 ms = 3 minutes)
 #define INITIAL_COOLDOWN_TIME 1200000         // Initial pre-hysteresis cooling period in milliseconds (1,200,000 ms = 20 minutes)
 
