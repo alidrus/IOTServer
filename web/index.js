@@ -12,14 +12,15 @@ const ids = {
 
 const csEmoji = {
     'OK': '😊🌡️',
-    'TooHot': '😓☀️',
-    'TooCold': '🥶❄️' ,
-    'TooDry': '💨🌵',
-    'TooHumid': '😓💧',
-    'HotAndHumid': '😓💦',
-    'HotAndDry': '😓🌵',
-    'ColdAndHumid': '🥶💧',
-    'ColdAndDry': '🥶🌵',
+    'Too Hot': '😓☀️',
+    'Too Cold': '🥶❄️' ,
+    'Too Dry': '💨🌵',
+    'Too Humid': '😓💧',
+    'Hot and Humid': '😓💦',
+    'Hot and Dry': '😓🌵',
+    'Cold and Humid': '🥶💧',
+    'Cold and Dry': '🥶🌵',
+    'Unknown': '🤨🧐',
 };
 
 // update the LED button and LED state on the page
@@ -61,7 +62,7 @@ const updateStatus = function (responseText) {
         const csObj = document.getElementById('comfortStatusEmoji');
         const cstObj = document.getElementById('comfortStatusText');
         csObj.innerText = Object.hasOwn(csEmoji, statusObj.environment.cs) ? csEmoji[statusObj.environment.cs] : '?';
-        cstObj.innerText = statusObj.environment.cs.replace(/([A-Z])/g, ' $1').trim();
+        cstObj.innerText = statusObj.environment.cs;
     }
 };
 

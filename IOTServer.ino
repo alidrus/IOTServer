@@ -176,28 +176,28 @@ void setup() {
                     comfortStatus = "OK";
                     break;
                 case Comfort_TooHot:
-                    comfortStatus = "TooHot";
+                    comfortStatus = "Too Hot";
                     break;
                 case Comfort_TooCold:
-                    comfortStatus = "TooCold";
+                    comfortStatus = "Too Cold";
                     break;
                 case Comfort_TooDry:
-                    comfortStatus = "TooDry";
+                    comfortStatus = "Too Dry";
                     break;
                 case Comfort_TooHumid:
-                    comfortStatus = "TooHumid";
+                    comfortStatus = "Too Humid";
                     break;
                 case Comfort_HotAndHumid:
-                    comfortStatus = "HotAndHumid";
+                    comfortStatus = "Hot and Humid";
                     break;
                 case Comfort_HotAndDry:
-                    comfortStatus = "HotAndDry";
+                    comfortStatus = "Hot and Dry";
                     break;
                 case Comfort_ColdAndHumid:
-                    comfortStatus = "ColdAndHumid";
+                    comfortStatus = "Cold and Humid";
                     break;
                 case Comfort_ColdAndDry:
-                    comfortStatus = "ColdAndDry";
+                    comfortStatus = "Cold and Dry";
                     break;
                 default:
                     comfortStatus = "Unknown";
