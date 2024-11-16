@@ -10,6 +10,7 @@
 #include "IndexHtml.h"
 #include "Pins.h"
 #include "Secrets.h"
+#include "Calibration.h"
 
 #include <IRremote.hpp>
 
@@ -36,7 +37,7 @@ static const char* environmentResponse = "{\"ts\": \"%.1f\", \"t\": \"%.1f\", \"
 unsigned long lastSyncTime = millis();
 unsigned long lastHysteresisTime = millis();
 
-char stringBuffer[96];
+char stringBuffer[100];
 
 void wifiSetup() {
     // Disconnect from WiFi
@@ -165,9 +166,10 @@ void setup() {
             request->send(503, "text/plain", "Service unavailable");
         } else {
             const float targetDewPoint = climateControl.getTargetDewPoint();
-            const float heatIndex = dht.computeHeatIndex(dhtValues.temperature, dhtValues.humidity);
-            const float dewPoint = dht.computeDewPoint(dhtValues.temperature, dhtValues.humidity);
-            const float cr = dht.getComfortRatio(cf, dhtValues.temperature, dhtValues.humidity);
+            const float temperature = dhtValues.temperature + TEMPERATURE_CALIBRATION;
+            const float heatIndex = dht.computeHeatIndex(temperature, dhtValues.humidity);
+            const float dewPoint = dht.computeDewPoint(temperature, dhtValues.humidity);
+            const float cr = dht.getComfortRatio(cf, temperature, dhtValues.humidity);
 
             String comfortStatus;
 
@@ -204,7 +206,7 @@ void setup() {
                     break;
             };
 
-            sprintf(stringBuffer, environmentResponse, targetDewPoint, dhtValues.temperature, dhtValues.humidity, heatIndex, dewPoint, comfortStatus);
+            sprintf(stringBuffer, environmentResponse, targetDewPoint, temperature, dhtValues.humidity, heatIndex, dewPoint, comfortStatus);
             request->send(200, "application/json", stringBuffer);
         }
     });
@@ -246,7 +248,8 @@ void loop() {
         lastHysteresisTime = timeElapsed;
 
         TempAndHumidity dhtValues = dht.getTempAndHumidity();
-        const float dewPoint = dht.computeDewPoint(dhtValues.temperature, dhtValues.humidity);
+        const float temperature = dhtValues.temperature + TEMPERATURE_CALIBRATION;
+        const float dewPoint = dht.computeDewPoint(temperature, dhtValues.humidity);
 
         climateControl.monitorComfort(dewPoint);
     }
