@@ -22,21 +22,24 @@ void Hysteresis::monitorComfort(float currentDewPoint) {
     bool applyHysteresis = (currentTime - this->acStartTime >= INITIAL_COOLDOWN_TIME);
 
     // Check if compressor should be turned ON
-    if (currentDewPoint > this->targetDewPoint && !this->compressorOn && (currentTime - this->compressorRestStartTime >= MIN_REST_TIME)) {
+    if (currentDewPoint > this->targetDewPoint
+            && !this->compressorIsOn
+            && (currentTime - this->compressorRestStartTime >= MIN_REST_TIME))
+    {
         // Turn compressor ON if heat index is above target and rest time has passed
-        this->compressorOn = true;
-        this->compressorStartTime = currentTime;
+        this->compressorIsOn = true;
+        this->compressorRunStartTime = currentTime;
         compressorController.turnCompressorOn(); // Send cooling mode signal
     }
 
     // Check if compressor should be turned OFF
-    if (this->compressorOn
-            && ((applyHysteresis && currentDewPoint <= this->targetDewPoint - this->hysteresisBuffer) // Apply hysteresis after cooldown time
-                || (!applyHysteresis && currentDewPoint <= this->targetDewPoint)                // No hysteresis during initial cooldown
-                || (currentTime - this->compressorStartTime >= MAX_RUN_TIME)))                    // Max runtime safety cutoff
+    if (this->compressorIsOn
+            && ((applyHysteresis && currentDewPoint < (this->targetDewPoint - this->hysteresisBuffer))  // Apply hysteresis after cooldown time
+                || (!applyHysteresis && currentDewPoint < this->targetDewPoint)                         // No hysteresis during initial cooldown
+                || (currentTime - this->compressorRunStartTime >= MAX_RUN_TIME)))                       // Max runtime safety cutoff
     {
         // Turn compressor OFF if any of the above conditions are met
-        this->compressorOn = false;
+        this->compressorIsOn = false;
         this->compressorRestStartTime = currentTime; // Start rest timer
         compressorController.turnCompressorOff(); // Send fan mode signal
     }
@@ -48,7 +51,7 @@ float Hysteresis::getTargetDewPoint() const {
     return this->targetDewPoint;
 }
 
-void Hysteresis::setTargetDewPoint(unsigned long targetDewPoint) {
+void Hysteresis::setTargetDewPoint(float targetDewPoint) {
     Serial.print("Hysteresis::setTargetDewPoint(");
     Serial.print(targetDewPoint);
     Serial.println(")");
