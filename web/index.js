@@ -4,6 +4,7 @@ const statusObj = {
     environment: null,
     ajaxCallInProgress: false,
     temperatureAdjustmentInProgress: false,
+    thermostatSetting: null,
 };
 
 const ids = {
@@ -36,6 +37,7 @@ const updateStatus = function (responseText) {
     if (Object.hasOwn(statusObj.environment, 'ts')) {
         const tsObj = document.getElementById('thermostatSetting');
         tsObj.innerText = statusObj.environment.ts + '°C';
+        statusObj.thermostatSetting = statusObj.environment.ts;
     }
 
     if (Object.hasOwn(statusObj.environment, 't')) {
@@ -99,7 +101,10 @@ const temperatureUp = () => {
 
     xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
-            updateStatus(this.responseText);
+            if (statusObj.thermostatSetting !== null && typeof statusObj.thermostatSetting === 'number') {
+                const tsObj = document.getElementById('thermostatSetting');
+                tsObj.innerText = (statusObj.thermostatSetting + 0.5) + '°C';
+            }
         }
 
         statusObj.temperatureAdjustmentInProgress = false;
@@ -124,7 +129,10 @@ const temperatureDown = () => {
 
     xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
-            updateStatus(this.responseText);
+            if (statusObj.thermostatSetting !== null && typeof statusObj.thermostatSetting === 'number') {
+                const tsObj = document.getElementById('thermostatSetting');
+                tsObj.innerText = (statusObj.thermostatSetting - 0.5) + '°C';
+            }
         }
 
         statusObj.temperatureAdjustmentInProgress = false;
