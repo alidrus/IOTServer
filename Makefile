@@ -5,7 +5,7 @@ SRC_CPP    := CompressorControl.cpp Hysteresis.cpp
 SRC_INO    := IOTServer.ino
 SRC_HEADER := CompressorControl.h Hysteresis.h
 SRC_WEB    := IndexHtml.h
-SRC_MISC   := Secrets.h Pins.h
+SRC_MISC   := Secrets.h Pins.h Calibration.h
 ELF        := $(BUILD_PATH)/$(SRC_INO).elf
 SERIAL_DEV := /dev/ttyUSB0
 BAUD_RATE  := 115200
@@ -19,6 +19,7 @@ $(ELF): $(SRC_CPP) $(SRC_HEADER) $(SRC_INO) $(SRC_MISC) $(SRC_WEB)
 $(SRC_MISC):
 	@./secrets
 	@./pins
+	@./calibration
 
 $(SRC_WEB): $(WEB_SRC)
 	pushd web && ./integrate && popd
