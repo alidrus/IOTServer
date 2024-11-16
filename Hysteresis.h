@@ -15,24 +15,24 @@
 class Hysteresis
 {
     public:
-        Hysteresis(float targetHeatIndex = 25, float hysteresisBuffer = 0.5)
+        Hysteresis(float targetDewPoint = 20, float hysteresisBuffer = 0.5)
         {
-            this->targetHeatIndex = targetHeatIndex;
+            this->targetDewPoint = targetDewPoint;
             this->hysteresisBuffer = hysteresisBuffer;
         }
 
-        void monitorComfort(float currentHeatIndex);
+        void monitorComfort(float currentDewPoint);
 
-        float getTargetHeatIndex() const;
+        float getTargetDewPoint() const;
 
-        void setTargetHeatIndex(unsigned long targetHeatIndex);
+        void setTargetDewPoint(unsigned long targetDewPoint);
 
-        void incrementTargetHeatIndex();
+        void incrementTargetDewPoint();
 
-        void decrementTargetHeatIndex();
+        void decrementTargetDewPoint();
 
     protected:
-        float targetHeatIndex;                      // Heat index is what the temperature "feels like"
+        float targetDewPoint;                       // Heat index is what the temperature "feels like"
         float hysteresisBuffer;                     // Buffer to prevent rapid cycling after initial cooldown
 
         bool compressorOn = false;                  // Is the compressor running?

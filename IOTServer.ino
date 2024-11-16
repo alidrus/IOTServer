@@ -141,7 +141,7 @@ void setup() {
     server.on("/temperature/up", HTTP_GET, [] (AsyncWebServerRequest *request) {
         Serial.println("REQUEST: /temperature/up");
 
-        climateControl.incrementTargetHeatIndex();
+        climateControl.incrementTargetDewPoint();
 
         request->send(200, "text/plain", "OK");
     });
@@ -150,7 +150,7 @@ void setup() {
     server.on("/temperature/down", HTTP_GET, [] (AsyncWebServerRequest *request) {
         Serial.println("REQUEST: /temperature/down");
 
-        climateControl.decrementTargetHeatIndex();
+        climateControl.decrementTargetDewPoint();
 
         request->send(200, "text/plain", "OK");
     });
@@ -164,10 +164,10 @@ void setup() {
         if (dht.getStatus() != 0) {
             request->send(503, "text/plain", "Service unavailable");
         } else {
-            const float targetHeatIndex = climateControl.getTargetHeatIndex();
-            const float heatIndex = dht.computeHeatIndex(dhtValues.temperature - 2, dhtValues.humidity);
-            const float dewPoint = dht.computeDewPoint(dhtValues.temperature - 2, dhtValues.humidity);
-            const float cr = dht.getComfortRatio(cf, dhtValues.temperature - 2, dhtValues.humidity);
+            const float targetDewPoint = climateControl.getTargetDewPoint();
+            const float heatIndex = dht.computeHeatIndex(dhtValues.temperature, dhtValues.humidity);
+            const float dewPoint = dht.computeDewPoint(dhtValues.temperature, dhtValues.humidity);
+            const float cr = dht.getComfortRatio(cf, dhtValues.temperature, dhtValues.humidity);
 
             String comfortStatus;
 
@@ -204,7 +204,7 @@ void setup() {
                     break;
             };
 
-            sprintf(stringBuffer, environmentResponse, targetHeatIndex, dhtValues.temperature - 2, dhtValues.humidity, heatIndex, dewPoint, comfortStatus);
+            sprintf(stringBuffer, environmentResponse, targetDewPoint, dhtValues.temperature, dhtValues.humidity, heatIndex, dewPoint, comfortStatus);
             request->send(200, "application/json", stringBuffer);
         }
     });
@@ -246,8 +246,8 @@ void loop() {
         lastHysteresisTime = timeElapsed;
 
         TempAndHumidity dhtValues = dht.getTempAndHumidity();
-        const float heatIndex = dht.computeHeatIndex(dhtValues.temperature - 2, dhtValues.humidity);
+        const float dewPoint = dht.computeDewPoint(dhtValues.temperature, dhtValues.humidity);
 
-        climateControl.monitorComfort(heatIndex);
+        climateControl.monitorComfort(dewPoint);
     }
 }

@@ -5,9 +5,9 @@
 #include "CompressorControl.h"
 #include "Hysteresis.h"
 
-void Hysteresis::monitorComfort(float currentHeatIndex) {
+void Hysteresis::monitorComfort(float currentDewPoint) {
     Serial.print("Hysteresis::monitorComfort(");
-    Serial.print(currentHeatIndex);
+    Serial.print(currentDewPoint);
     Serial.println(")");
 
     CompressorControl compressorController;
@@ -22,7 +22,7 @@ void Hysteresis::monitorComfort(float currentHeatIndex) {
     bool applyHysteresis = (currentTime - this->acStartTime >= INITIAL_COOLDOWN_TIME);
 
     // Check if compressor should be turned ON
-    if (currentHeatIndex > this->targetHeatIndex && !this->compressorOn && (currentTime - this->compressorRestStartTime >= MIN_REST_TIME)) {
+    if (currentDewPoint > this->targetDewPoint && !this->compressorOn && (currentTime - this->compressorRestStartTime >= MIN_REST_TIME)) {
         // Turn compressor ON if heat index is above target and rest time has passed
         this->compressorOn = true;
         this->compressorStartTime = currentTime;
@@ -31,8 +31,8 @@ void Hysteresis::monitorComfort(float currentHeatIndex) {
 
     // Check if compressor should be turned OFF
     if (this->compressorOn
-            && ((applyHysteresis && currentHeatIndex <= this->targetHeatIndex - this->hysteresisBuffer) // Apply hysteresis after cooldown time
-                || (!applyHysteresis && currentHeatIndex <= this->targetHeatIndex)                // No hysteresis during initial cooldown
+            && ((applyHysteresis && currentDewPoint <= this->targetDewPoint - this->hysteresisBuffer) // Apply hysteresis after cooldown time
+                || (!applyHysteresis && currentDewPoint <= this->targetDewPoint)                // No hysteresis during initial cooldown
                 || (currentTime - this->compressorStartTime >= MAX_RUN_TIME)))                    // Max runtime safety cutoff
     {
         // Turn compressor OFF if any of the above conditions are met
@@ -42,28 +42,28 @@ void Hysteresis::monitorComfort(float currentHeatIndex) {
     }
 }
 
-float Hysteresis::getTargetHeatIndex() const {
-    Serial.println("Hysteresis::getTargetHeatIndex()");
+float Hysteresis::getTargetDewPoint() const {
+    Serial.println("Hysteresis::getTargetDewPoint()");
 
-    return this->targetHeatIndex;
+    return this->targetDewPoint;
 }
 
-void Hysteresis::setTargetHeatIndex(unsigned long targetHeatIndex) {
-    Serial.print("Hysteresis::setTargetHeatIndex(");
-    Serial.print(targetHeatIndex);
+void Hysteresis::setTargetDewPoint(unsigned long targetDewPoint) {
+    Serial.print("Hysteresis::setTargetDewPoint(");
+    Serial.print(targetDewPoint);
     Serial.println(")");
 
-    this->targetHeatIndex = targetHeatIndex;
+    this->targetDewPoint = targetDewPoint;
 }
 
-void Hysteresis::incrementTargetHeatIndex() {
-    Serial.println("Hysteresis::incrementTargetHeatIndex()");
+void Hysteresis::incrementTargetDewPoint() {
+    Serial.println("Hysteresis::incrementTargetDewPoint()");
 
-    this->targetHeatIndex += 0.5;
+    this->targetDewPoint += 0.5;
 }
 
-void Hysteresis::decrementTargetHeatIndex() {
-    Serial.println("Hysteresis::decrementTargetHeatIndex()");
+void Hysteresis::decrementTargetDewPoint() {
+    Serial.println("Hysteresis::decrementTargetDewPoint()");
 
-    this->targetHeatIndex -= 0.5;
+    this->targetDewPoint -= 0.5;
 }
