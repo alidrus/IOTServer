@@ -1,3 +1,5 @@
+// vim: syntax=javascript expandtab tabstop=4 shiftwidth=4 softtabstop=4:
+
 // this object will hold the current status of the LED as obtained from the
 // AJAX call
 const statusObj = {
@@ -23,6 +25,11 @@ const csEmoji = {
     'Cold and Dry': '🥶🌵',
     'Unknown': '🤨🧐',
 };
+
+const coEmoji = [
+    'Compressor is off ⚪',
+    'Compressor is on ⚡',
+];
 
 // update the LED button and LED state on the page
 const updateStatus = function (responseText) {
@@ -65,6 +72,11 @@ const updateStatus = function (responseText) {
         const cstObj = document.getElementById('comfortStatusText');
         csObj.innerText = Object.hasOwn(csEmoji, statusObj.environment.cs) ? csEmoji[statusObj.environment.cs] : '?';
         cstObj.innerText = statusObj.environment.cs;
+    }
+
+    if (Object.hasOwn(statusObj.environment, 'co')) {
+        const coObj = document.getElementById('compressorState');
+        coObj.innerText = coEmoji[statusObj.environment.co ? 1 : 0];
     }
 };
 
