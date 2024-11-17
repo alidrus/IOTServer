@@ -122,11 +122,6 @@ const temperatureUp = () => {
     xhttp.open('GET', url, true);
 
     xhttp.send();
-
-    if (statusObj.thermostatSetting !== null && typeof statusObj.thermostatSetting === 'number') {
-        const tsObj = document.getElementById('thermostatSetting');
-        tsObj.innerText = (statusObj.thermostatSetting + 0.5) + '°C';
-    }
 };
 
 // send temperature down command to the server
@@ -152,11 +147,6 @@ const temperatureDown = () => {
     xhttp.open('GET', url, true);
 
     xhttp.send();
-
-    if (statusObj.thermostatSetting !== null && typeof statusObj.thermostatSetting === 'number') {
-        const tsObj = document.getElementById('thermostatSetting');
-        tsObj.innerText = (statusObj.thermostatSetting - 0.5) + '°C';
-    }
 };
 
 // executed upon page loads
