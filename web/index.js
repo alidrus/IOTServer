@@ -113,10 +113,7 @@ const temperatureUp = () => {
 
     xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
-            if (statusObj.thermostatSetting !== null && typeof statusObj.thermostatSetting === 'number') {
-                const tsObj = document.getElementById('thermostatSetting');
-                tsObj.innerText = (statusObj.thermostatSetting + 0.5) + '°C';
-            }
+            console.log('Increasing temperature successful');
         }
 
         statusObj.temperatureAdjustmentInProgress = false;
@@ -125,6 +122,11 @@ const temperatureUp = () => {
     xhttp.open('GET', url, true);
 
     xhttp.send();
+
+    if (statusObj.thermostatSetting !== null && typeof statusObj.thermostatSetting === 'number') {
+        const tsObj = document.getElementById('thermostatSetting');
+        tsObj.innerText = (statusObj.thermostatSetting + 0.5) + '°C';
+    }
 };
 
 // send temperature down command to the server
@@ -141,10 +143,7 @@ const temperatureDown = () => {
 
     xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
-            if (statusObj.thermostatSetting !== null && typeof statusObj.thermostatSetting === 'number') {
-                const tsObj = document.getElementById('thermostatSetting');
-                tsObj.innerText = (statusObj.thermostatSetting - 0.5) + '°C';
-            }
+            console.log('Lowering temperature successful');
         }
 
         statusObj.temperatureAdjustmentInProgress = false;
@@ -153,6 +152,11 @@ const temperatureDown = () => {
     xhttp.open('GET', url, true);
 
     xhttp.send();
+
+    if (statusObj.thermostatSetting !== null && typeof statusObj.thermostatSetting === 'number') {
+        const tsObj = document.getElementById('thermostatSetting');
+        tsObj.innerText = (statusObj.thermostatSetting - 0.5) + '°C';
+    }
 };
 
 // executed upon page loads
