@@ -19,12 +19,12 @@ void Hysteresis::monitorComfort(float currentDewPoint) {
     }
 
     // Determine if hysteresis should be applied
-    bool applyHysteresis = (currentTime - this->acStartTime >= INITIAL_COOLDOWN_TIME);
+    bool applyHysteresis = (currentTime - this->acStartTime > INITIAL_COOLDOWN_TIME);
 
     // Check if compressor should be turned ON
     if (currentDewPoint > this->targetDewPoint
             && !this->compressorIsOn
-            && (currentTime - this->compressorRestStartTime >= MIN_REST_TIME))
+            && ((currentTime - this->compressorRestStartTime >= MIN_REST_TIME) || !applyHysteresis))
     {
         // Turn compressor ON if heat index is above target and rest time has passed
         this->compressorIsOn = true;
