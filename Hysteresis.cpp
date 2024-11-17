@@ -70,3 +70,7 @@ void Hysteresis::decrementTargetDewPoint() {
 
     this->targetDewPoint -= 0.5;
 }
+
+bool getCompressorIsOn() {
+    return this->compressorIsOn;
+}

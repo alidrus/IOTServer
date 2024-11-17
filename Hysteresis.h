@@ -31,6 +31,8 @@ class Hysteresis
 
         void decrementTargetDewPoint();
 
+        bool getCompressorIsOn();
+
     protected:
         float targetDewPoint;                       // Heat index is what the temperature "feels like"
         float hysteresisBuffer;                     // Buffer to prevent rapid cycling after initial cooldown
