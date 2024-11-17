@@ -15,7 +15,7 @@
 class Hysteresis
 {
     public:
-        Hysteresis(float targetDewPoint = 18.0f, float hysteresisBuffer = 0.5f)
+        Hysteresis(float targetDewPoint = 18.0, float hysteresisBuffer = 0.5)
         {
             this->targetDewPoint = targetDewPoint;
             this->hysteresisBuffer = hysteresisBuffer;
