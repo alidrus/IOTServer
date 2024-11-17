@@ -29,6 +29,8 @@ ComfortState cf;
 
 Hysteresis climateControl;
 
+bool firstLoopIteration = true;
+
 static const char* okResponse = "HTTP/1.1 200 OK";
 static const char* contentHeaderJson = "Content-Type: application/json";
 static const char* contentHeaderHtml = "Content-Type: text/html";
@@ -238,14 +240,14 @@ void loop() {
     }
 
     // Run every 60 seconds
-    if ((timeElapsed - lastSyncTime) >= 60000) {
+    if (firstLoopIteration || (timeElapsed - lastSyncTime) >= 60000) {
         lastSyncTime = timeElapsed;
 
         timeClient.update();
     }
 
     // Run every 20 seconds
-    if ((timeElapsed - lastHysteresisTime) >= 20000) {
+    if (firstLoopIteration || (timeElapsed - lastHysteresisTime) >= 20000) {
         lastHysteresisTime = timeElapsed;
 
         TempAndHumidity dhtValues = dht.getTempAndHumidity();
@@ -254,4 +256,6 @@ void loop() {
 
         climateControl.monitorComfort(dewPoint);
     }
+
+    firstLoopIteration = false;
 }
