@@ -32,12 +32,12 @@ Hysteresis climateControl;
 static const char* okResponse = "HTTP/1.1 200 OK";
 static const char* contentHeaderJson = "Content-Type: application/json";
 static const char* contentHeaderHtml = "Content-Type: text/html";
-static const char* environmentResponse = "{\"ts\": \"%.1f\", \"t\": \"%.1f\", \"h\": \"%.1f\", \"hi\": \"%.1f\", \"dp\": \"%.1f\", \"cs\": \"%s\"}";
+static const char* environmentResponse = "{\"ts\": \"%.1f\", \"t\": \"%.1f\", \"h\": \"%.1f\", \"hi\": \"%.1f\", \"dp\": \"%.1f\", \"cs\": \"%s\", \"co\": %s}";
 
 unsigned long lastSyncTime = millis();
 unsigned long lastHysteresisTime = millis();
 
-char stringBuffer[100];
+char stringBuffer[112];
 
 void wifiSetup() {
     // Disconnect from WiFi
@@ -170,6 +170,7 @@ void setup() {
             const float heatIndex = dht.computeHeatIndex(temperature, dhtValues.humidity);
             const float dewPoint = dht.computeDewPoint(temperature, dhtValues.humidity);
             const float cr = dht.getComfortRatio(cf, temperature, dhtValues.humidity);
+            const float compressorIsOn = climateControl.getCompressorIsOn();
 
             String comfortStatus;
 
@@ -206,7 +207,7 @@ void setup() {
                     break;
             };
 
-            sprintf(stringBuffer, environmentResponse, targetDewPoint, temperature, dhtValues.humidity, heatIndex, dewPoint, comfortStatus);
+            sprintf(stringBuffer, environmentResponse, targetDewPoint, temperature, dhtValues.humidity, heatIndex, dewPoint, comfortStatus, compressorIsOn ? "true" : "false");
             request->send(200, "application/json", stringBuffer);
         }
     });
