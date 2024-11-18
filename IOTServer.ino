@@ -246,8 +246,8 @@ void loop() {
         timeClient.update();
     }
 
-    // Run every 20 seconds
-    if (firstLoopIteration || (timeElapsed - lastHysteresisTime) >= 20000) {
+    // Run every 30 seconds
+    if (firstLoopIteration || (timeElapsed - lastHysteresisTime) >= 30000) {
         lastHysteresisTime = timeElapsed;
 
         TempAndHumidity dhtValues = dht.getTempAndHumidity();
