@@ -246,15 +246,22 @@ void loop() {
         timeClient.update();
     }
 
+    unsigned long rawTime = timeClient.getEpochTime();
+    unsigned long hours = (rawTime % 86400L) / 3600;
+
     // Run every 30 seconds
     if (firstLoopIteration || (timeElapsed - lastHysteresisTime) >= 30000) {
         lastHysteresisTime = timeElapsed;
 
-        TempAndHumidity dhtValues = dht.getTempAndHumidity();
-        const float temperature = dhtValues.temperature + TEMPERATURE_CALIBRATION;
-        const float dewPoint = dht.computeDewPoint(temperature, dhtValues.humidity);
+        // Only run from 10:00 AM and before 11:00 PM
+        if (hours > 9 && hours < 23) {
+            TempAndHumidity dhtValues = dht.getTempAndHumidity();
 
-        climateControl.monitorComfort(dewPoint);
+            const float temperature = dhtValues.temperature + TEMPERATURE_CALIBRATION;
+            const float dewPoint = dht.computeDewPoint(temperature, dhtValues.humidity);
+
+            climateControl.monitorComfort(dewPoint);
+        }
     }
 
     firstLoopIteration = false;
