@@ -14,6 +14,8 @@ void Hysteresis::monitorComfort(float currentDewPoint) {
 
     const unsigned long currentTime = millis(); // Function to get current time in seconds
 
+    int compressorAction = COMPRESSOR_NO_CHANGE;
+
     if (this->acStartTime == 0) {
         this->acStartTime = currentTime;
     }
@@ -29,7 +31,7 @@ void Hysteresis::monitorComfort(float currentDewPoint) {
         // Turn compressor ON if heat index is above target and rest time has passed
         this->compressorIsOn = true;
         this->compressorRunStartTime = currentTime;
-        compressorController.turnCompressorOn(); // Send cooling mode signal
+        compressorAction = COMPRESSOR_TURN_ON;
     }
 
     // Check if compressor should be turned OFF
@@ -41,7 +43,36 @@ void Hysteresis::monitorComfort(float currentDewPoint) {
         // Turn compressor OFF if any of the above conditions are met
         this->compressorIsOn = false;
         this->compressorRestStartTime = currentTime; // Start rest timer
-        compressorController.turnCompressorOff(); // Send fan mode signal
+        compressorAction = COMPRESSOR_TURN_OFF;
+    }
+
+    // Failsafe to prevent compressor run-on:
+    // Compressor was supposedly turned off but the dew point is a lot lower than the threshold
+    if (!this->compressorIsOn && currentDewPoint < (this->targetDewPoint - (1.5 * this->hysteresisBuffer)))
+    {
+        // Turn compressor OFF and reset compressor rest start time
+        this->compressorIsOn = false;
+        this->compressorRestStartTime = currentTime; // Start rest timer
+        compressorAction = COMPRESSOR_TURN_OFF;
+    }
+    // Failsafe to prevent overheating:
+    // Compressor was supposedly turned on but the dew point is a lot higher than the threshold
+    else if (this->compressorIsOn && currentDewPoint > (this->targetDewPoint + (1.5 * this->hysteresisBuffer)))
+    {
+        // Turn compressor ON and reset compressor run start time
+        this->compressorIsOn = true;
+        this->compressorRunStartTime = currentTime;
+        compressorAction = COMPRESSOR_TURN_ON;
+    }
+
+    // Run compressor control action only once
+    switch(compressorAction) {
+        case COMPRESSOR_TURN_OFF:
+            compressorController.turnCompressorOff(); // Send fan mode signal
+            break;
+        case COMPRESSOR_TURN_ON:
+            compressorController.turnCompressorOn(); // Send cooling mode signal
+            break;
     }
 }
 
