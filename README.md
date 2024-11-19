@@ -2,6 +2,8 @@
 
 ![Project Prototype](images/project.jpg "Prototype of IOTServer")
 
+![Web Interface](images/web_screenshot.png "Screenshot of Web Interface")
+
 
 ## Climate Control Web Interface
 
