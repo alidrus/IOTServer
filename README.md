@@ -1,11 +1,10 @@
 # IOTServer
 
 ![Project Prototype](images/project.jpg "Prototype of IOTServer")
-![Web Interface](images/web_screenshot.png "Screenshot of Web Interface")
-![IR LED Driver Circuit](images/IR_LED_Driver_Circuit.png "IR LED Driver Circuit")
-
 
 ## Climate Control Web Interface
+
+![Web Interface](images/web_screenshot.png "Screenshot of Web Interface")
 
 IOTServer started out as a simple POC (Proof Of Concept) pet project to turn an
 LED on and off using a web interface. However, since that does nothing really
@@ -90,3 +89,21 @@ Compiling the project is as simple as running `make` (tested on Ubuntu 24.04 wit
 ### Uploading To ESP32
 
 Uploading to ESP32 is a simple matter of running `make upload` (tested on Ubuntu 24.04 with `arduino-cli`)
+
+
+## Bill Of Materials
+
+- ESP32 board (the one I used was the 30-pin ESP-32-WROOM)
+- 2N2222 NPN transistor
+- 330 Ω resistor between the GPIO signal pin and the base of the 2N2222
+- 10 Ω resistor connected between +5V and IR LED
+- IR LED connected between 10 Ω resistor and the collector of the 2N2222
+- DHT22 temperature and humidity sensor
+
+
+## The Physical Circuit
+
+![IR LED Driver Circuit](images/IR_LED_Driver_Circuit.png "IR LED Driver Circuit")
+
+The LED circuit is powered directly by the 5V power supply and therefore will
+not affect the current flow through the GPIO pins.
