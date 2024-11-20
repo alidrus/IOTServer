@@ -102,7 +102,7 @@ You will need the following tools to set up and deploy this project:
    cd IOTServer
    ```
 
-2. **Build `IndexHtml.h`:**
+2. **Install node modules needed to build `IndexHtml.h`:**
    Navigate to the `web` folder and install dependencies:
    Using `npm`:
    ```bash
@@ -114,15 +114,30 @@ You will need the following tools to set up and deploy this project:
    cd web
    yarn install
    ```
-   Run the integration script to build `IndexHtml.h`:
-   ```bash
-   ./integrate
-   ```
 
-3. **Compile and Upload to ESP32:**
-   Use `make` to compile the project and `make upload` to flash it to your ESP32:
+3. **Compile:**
+   Use `make` to compile the project:
    ```bash
    make
+   ```
+   You may be prompted to provide additional information such as the
+   temperature calibration value, the pin that the DHT22 sensor is connected
+   to, the IR transmitter pin (the one that leads into the 2N2222's collector),
+   WiFi hostname, WiFi SSID and WiFi password. This will only happen the first
+   time you run make.
+   ```
+   $ make
+   Hostname of ESP32: iotserver
+   WiFi SSID: myiot
+   WiFi Password: mypassword
+   Which pin is the DHT humidity and temperature sensor connected to? 17
+   Which pin is the infra-red LED connected to? 12
+   Temperature calibration amount (e.g. 1.2f): -1.2f
+   ```
+
+4. **Upload to ESP32:**
+   Use `make upload` to flash it to your ESP32:
+   ```bash
    make upload
    ```
 
