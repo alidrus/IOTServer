@@ -249,8 +249,8 @@ void loop() {
     unsigned long rawTime = timeClient.getEpochTime();
     unsigned long hours = (rawTime % 86400L) / 3600;
 
-    // Run every 30 seconds
-    if (firstLoopIteration || (timeElapsed - lastHysteresisTime) >= 30000) {
+    // Run every 60 seconds
+    if (firstLoopIteration || (timeElapsed - lastHysteresisTime) >= 60000) {
         lastHysteresisTime = timeElapsed;
 
         // Only run from 10:00 AM and before 11:00 PM
