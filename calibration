@@ -2,7 +2,7 @@
 
 while [ ! "${TEMPERATURE_CALIBRATION}" ]
 do
-    echo -n "Temperature calibration amount (e.g. 1.2f): "
+    echo -n "Temperature calibration amount (e.g. -1.2): "
     read TEMPERATURE_CALIBRATION
 done
 
