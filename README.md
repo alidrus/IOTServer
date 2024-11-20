@@ -1,109 +1,144 @@
-# IOTServer
+# IoT Climate Control for Wall-Mounted Air Conditioner
 
-![Project Prototype](images/project.jpg "Prototype of IOTServer")
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Platform: ESP32](https://img.shields.io/badge/Platform-ESP32-blue)](https://espressif.com)
 
-## Climate Control Web Interface
+---
 
-![Web Interface](images/web_screenshot.png "Screenshot of Web Interface")
+## Introduction
 
-IOTServer started out as a simple POC (Proof Of Concept) pet project to turn an
-LED on and off using a web interface. However, since that does nothing really
-useful, I decided to expand it into a Climate Control server.
+Wall-mounted air conditioners are convenient and widely used appliances, but they often struggle with inefficiencies that affect both comfort and energy consumption. This project introduces an intelligent, IoT-based climate control system that optimizes air conditioner operation by addressing these inefficiencies.
 
+---
 
-### Introduction
+## Problem Statement
 
-ESP32 is a series of low-cost, low-power system-on-chip microcontrollers with
-integrated Wi-Fi and dual-mode Bluetooth
-(Source: [Wikipedia entry](https://en.wikipedia.org/wiki/ESP32)).
-It provides a fairly low cost entry into the field of *IoT*.
+Wall-mounted air conditioners rely on temperature probes located near their intake vent—typically high up on the wall. This design introduces two significant issues:
 
-This project creates a fairly low cost solution to control an air conditioner
-to prevent the compressor from running non-stop and consuming excessive
-electricity.
+1. **Inaccurate Temperature Measurement**
+   The temperature probe measures air closer to the ceiling, which is unrepresentative of the room's true ambient temperature, especially at the human comfort level. This can result in difficulty achieving the desired room temperature, leading to:
+   - Overcooling or overheating.
+   - The compressor running for extended periods without reaching the target.
 
+2. **Excessive Energy Consumption**
+   Prolonged compressor operation leads to skyrocketing electricity costs, especially in regions where energy prices are high. This inefficiency stems directly from the flawed measurement setup.
 
-### Requirements
+---
 
-In order to compile and run this test, you will need:
-* Mac OS or Linux (I have only tested this on an Ubuntu 24.04 machine)
-* [ESP32 microcontroller board](https://www.espressif.com/en/products/socs/esp32)
-* [Arduino IDE](https://www.arduino.cc/en/Main/Software) or [Arduino CLI](https://github.com/arduino/arduino-cli)
+## The Solution
 
+This project provides a **wall-mounted climate control device** designed to address these challenges. The device is installed on the wall opposite the air conditioner's blower unit and features the following:
 
-### Building IndexHtml.h
+- **Integrated Temperature/Humidity Sensor:** Positioned at chest level to provide accurate, representative readings of the room's temperature and humidity.
+- **Compressor Control:** Intelligently manages the air conditioner's compressor to optimize runtime and minimize energy consumption.
+- **Energy Efficiency:** By preventing unnecessary compressor operation, this device significantly reduces energy usage without compromising comfort.
+- **IoT Integration:** Enables remote monitoring and control of the air conditioner through an easy-to-use web interface.
 
-You may have noticed that when you try to compile the code, that IndexHtml.h is missing:
+---
 
-```
-pushd web && ./integrate && popd
-~/Personal/IOTServer/web ~/Personal/IOTServer
-node:internal/modules/cjs/loader:1242
-  throw err;
-  ^
+## Features
 
-Error: Cannot find module 'html-minifier'
-Require stack:
-- /home/user/Personal/IOTServer/web/integrate
-    at Module._resolveFilename (node:internal/modules/cjs/loader:1239:15)
-    at Module._load (node:internal/modules/cjs/loader:1065:27)
-    at Module.require (node:internal/modules/cjs/loader:1325:19)
-    at require (node:internal/modules/helpers:179:18)
-    at Object.<anonymous> (/home/user/Personal/IOTServer/web/integrate:5:22)
-    at Module._compile (node:internal/modules/cjs/loader:1483:14)
-    at Module._extensions..js (node:internal/modules/cjs/loader:1562:10)
-    at Module.load (node:internal/modules/cjs/loader:1302:32)
-    at Module._load (node:internal/modules/cjs/loader:1118:12)
-    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:174:12) {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: [ '/home/user/Personal/IOTServer/web/integrate' ]
-}
+- **Energy Savings:** Prevents overuse of the compressor by ensuring optimal runtime.
+- **Accurate Temperature Monitoring:** Uses a DHT22 (or similar) temperature/humidity sensor to track the room's environmental conditions.
+- **Web Control:** Includes a user-friendly interface for setting temperature thresholds and monitoring system status.
+- **Customizable and Open Source:** Fully open-source project based on the ESP32, allowing customization and contributions.
 
-Node.js v20.18.0
-make: *** [Makefile:14: IndexHtml.h] Error 1
-```
+---
 
-In order to build `IndexHtml.h`, you will need [NodeJS](https://nodejs.org/en/)
-and either `npm` or `yarn` installed so that you can install the dependencies:
+## Bill of Materials (BOM)
 
-Using `npm`:
-```
-cd web
-npm install
-```
+To build this climate control device, you will need the following components:
 
-Using `yarn`:
-```
-cd web
-npm install
-```
+- **ESP32 Board**: Any ESP32-based development board will work. (This project uses the 30-pin ESP-32-WROOM.)
+- **2N2222 NPN Transistor**: Used to drive the IR LED for communication with the air conditioner.
+  - **Why a Transistor Is Necessary:**
+    1. The GPIO pin on the ESP32 can only supply limited current (typically 20mA, max 40mA), which is insufficient to drive the IR LED effectively.
+    2. Overloading the GPIO pin could damage the ESP32.
+    3. The transistor acts as a switch, allowing the IR LED to draw sufficient current directly from the power supply without affecting the GPIO pin.
+- **330 Ω Resistor**: Limits the base current to the 2N2222 transistor.
+- **10 Ω Resistor**: Limits current through the IR LED to prevent damage.
+- **IR LED**: Transmits signals to the air conditioner. Connect between the 10 Ω resistor and the collector of the 2N2222.
+- **DHT22 Sensor**: Combines temperature and humidity sensing for environmental readings.
+- **5V DC Power Supply (1A recommended):** Powers the ESP32 and associated circuitry.
 
-From then on you should be able to and compile everything.
+---
 
+## Getting Started
 
-### Compiling
+### Hardware and Software Requirements
 
-Compiling the project is as simple as running `make` (tested on Ubuntu 24.04 with `arduino-cli`).
+You will need the following tools to set up and deploy this project:
 
+- A computer running Mac OS or Linux (tested on Ubuntu 24.04).
+- [ESP32 Microcontroller Board](https://www.espressif.com/en/products/socs/esp32).
+- [Arduino CLI](https://github.com/arduino/arduino-cli) for uploading the firmware.
+- [Node.js](https://nodejs.org/en/) and npm or yarn for compiling the web interface.
 
-### Uploading To ESP32
+---
 
-Uploading to ESP32 is a simple matter of running `make upload` (tested on Ubuntu 24.04 with `arduino-cli`)
+### Setup Instructions
 
+1. **Clone and Compile the Project:**
+   ```bash
+   git clone https://github.com/alidrus/IOTServer.git
+   cd IOTServer
+   ```
 
-## Bill Of Materials
+2. **Build `IndexHtml.h`:**
+   Navigate to the `web` folder and install dependencies:
+   Using `npm`:
+   ```bash
+   cd web
+   npm install
+   ```
+   Using `yarn`:
+   ```bash
+   cd web
+   yarn install
+   ```
+   Run the integration script to build `IndexHtml.h`:
+   ```bash
+   ./integrate
+   ```
 
-- ESP32 board (the one I used was the 30-pin ESP-32-WROOM)
-- 2N2222 NPN transistor
-- 330 Ω resistor between the GPIO signal pin and the base of the 2N2222
-- 10 Ω resistor connected between +5V and IR LED
-- IR LED connected between 10 Ω resistor and the collector of the 2N2222
-- DHT22 temperature and humidity sensor
+3. **Compile and Upload to ESP32:**
+   Use `make` to compile the project and `make upload` to flash it to your ESP32:
+   ```bash
+   make
+   make upload
+   ```
 
+---
 
-## The Physical Circuit
+## How It Works
 
-![IR LED Driver Circuit](images/IR_LED_Driver_Circuit.png "IR LED Driver Circuit")
+1. The system continuously monitors the room’s actual temperature and humidity using the onboard sensor.
+2. Based on the desired temperature threshold set by the user, the device sends IR signals to the air conditioner to control its operation.
+3. Intelligent control prevents the compressor from running unnecessarily, conserving energy while maintaining comfort.
 
-The LED circuit is powered directly by the 5V power supply and therefore will
-not affect the current flow through the GPIO pins.
+---
+
+## Roadmap
+
+- Add support for **Google Home integration**.
+- Develop a **more advanced web interface**.
+- Integrate **power monitoring** to track energy usage and savings.
+- Enable **Home Assistant integration** for expanded automation possibilities.
+
+---
+
+## Contributing
+
+Contributions are welcome! If you have ideas or suggestions to improve this project, feel free to open an issue or submit a pull request.
+
+---
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## Acknowledgments
+
+Special thanks to everyone in the open-source community for their support and contributions.
