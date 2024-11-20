@@ -30,7 +30,7 @@ Wall-mounted air conditioners rely on temperature probes located near their inta
 This project provides a **wall-mounted climate control device** designed to address these challenges. The device is installed on the wall opposite the air conditioner's blower unit and features the following:
 
 - **Integrated Temperature/Humidity Sensor:** Positioned at chest level to provide accurate, representative readings of the room's temperature and humidity.
-- **Compressor Control:** Intelligently manages the air conditioner's compressor to optimize runtime and minimize energy consumption.
+- **Compressor Control:** Intelligently manages the air conditioner’s compressor to optimize runtime and minimize energy consumption.
 - **Energy Efficiency:** By preventing unnecessary compressor operation, this device significantly reduces energy usage without compromising comfort.
 - **IoT Integration:** Enables remote monitoring and control of the air conditioner through an easy-to-use web interface.
 
@@ -42,6 +42,10 @@ This project provides a **wall-mounted climate control device** designed to addr
 - **Accurate Temperature Monitoring:** Uses a DHT22 (or similar) temperature/humidity sensor to track the room's environmental conditions.
 - **Web Control:** Includes a user-friendly interface for setting temperature thresholds and monitoring system status.
 - **Customizable and Open Source:** Fully open-source project based on the ESP32, allowing customization and contributions.
+
+### Physical Prototype Circuit
+Here’s a picture of the physical prototype circuit built for this project:
+![Prototype Circuit](images/project.jpg)
 
 ---
 
@@ -60,6 +64,20 @@ To build this climate control device, you will need the following components:
 - **IR LED**: Transmits signals to the air conditioner. Connect between the 10 Ω resistor and the collector of the 2N2222.
 - **DHT22 Sensor**: Combines temperature and humidity sensing for environmental readings.
 - **5V DC Power Supply (1A recommended):** Powers the ESP32 and associated circuitry.
+
+---
+
+### IR LED Driver Circuit Schematic
+Below is the schematic of the IR LED driver circuit used to transmit signals to the air conditioner:
+![IR LED Driver Circuit](images/IR_LED_Driver_Circuit.png)
+
+---
+
+## Web Interface
+
+The device features an intuitive web interface for monitoring and controlling the air conditioner.
+Here’s a screenshot of the web interface:
+![Web Interface](images/web_screenshot.png)
 
 ---
 
