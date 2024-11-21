@@ -253,8 +253,8 @@ void loop() {
     if (firstLoopIteration || (timeElapsed - lastHysteresisTime) >= 60000) {
         lastHysteresisTime = timeElapsed;
 
-        // Only run from 10:00 AM and before 11:00 PM
-        if (hours > 9 && hours < 23) {
+        // Only run from 8:00 AM and stop before 12:00 AM
+        if (hours >= 8 && hours <= 23) {
             TempAndHumidity dhtValues = dht.getTempAndHumidity();
 
             const float temperature = dhtValues.temperature + TEMPERATURE_CALIBRATION;
