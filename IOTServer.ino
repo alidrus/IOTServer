@@ -37,9 +37,6 @@ static const char* contentHeaderJson = "Content-Type: application/json";
 static const char* contentHeaderHtml = "Content-Type: text/html";
 static const char* environmentResponse = "{\"ts\": \"%.1f\", \"t\": \"%.1f\", \"h\": \"%.1f\", \"hi\": \"%.1f\", \"dp\": \"%.1f\", \"cs\": \"%s\", \"co\": %s}";
 
-unsigned long lastSyncTime = millis();
-unsigned long lastHysteresisTime = millis();
-
 char stringBuffer[112];
 
 void wifiSetup() {
@@ -253,43 +250,31 @@ void setup() {
     delay(500);
 
     // Create Tasks
-    xTaskCreate(timeSyncTask, "Time Sync", 2000, NULL, 1, NULL);
-    xTaskCreate(hysteresisTask, "Hysteresis", 2000, NULL, 1, NULL);
-    xTaskCreate(wifiHealthTask, "WiFi Healthcheck", 1000, NULL, 1, NULL);
+    xTaskCreate(multiTask, "Multiple Task", 4000, NULL, 1, NULL);
 }
 
-void timeSyncTask(void *parameters) {
-    while (true) {
-        if (WiFi.status() != WL_CONNECTED) {
-            vTaskDelay(1000 / portTICK_PERIOD_MS);
+void multiTask(void *parameters) {
+    int counter = 0;
 
-            continue;
-        }
-
-        lastSyncTime = millis();
-
-        timeClient.update();
-
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-    }
-}
-
-void hysteresisTask(void *parameters) {
     unsigned long rawTime, hours;
 
     while (true) {
+        // Check WiFi health and reconnect if needed
         if (WiFi.status() != WL_CONNECTED) {
-            vTaskDelay(1000 / portTICK_PERIOD_MS);
-
-            continue;
+            wifiSetup();
         }
 
-        rawTime = timeClient.getEpochTime();
+        // Only perform timesync when connected to WiFi
+        if (WiFi.status() == WL_CONNECTED) {
+            timeClient.update();
+        }
 
-        hours = (rawTime % 86400L) / 3600;
+        // Run climate control monitoring every 20 seconds
+        if (counter % 20 == 0) {
+            rawTime = timeClient.getEpochTime();
 
-        // Only run from 8:00 AM and stop before 12:00 AM
-        if (hours >= 8 && hours <= 23) {
+            hours = (rawTime % 86400L) / 3600;
+
             TempAndHumidity dhtValues = dht.getTempAndHumidity();
 
             const float temperature = dhtValues.temperature + TEMPERATURE_CALIBRATION;
@@ -298,16 +283,9 @@ void hysteresisTask(void *parameters) {
             climateControl.monitorComfort(dewPoint);
         }
 
-        vTaskDelay(20000 / portTICK_PERIOD_MS);
-    }
-}
+        counter += 1;
 
-void wifiHealthTask(void *parameters) {
-    while (true) {
-        if (WiFi.status() != WL_CONNECTED) {
-            wifiSetup();
-        }
-
+        // Idle for the next second
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 }
