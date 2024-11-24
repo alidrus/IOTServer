@@ -1,6 +1,7 @@
 // vim: syntax=arduino autoindent expandtab tabstop=4 shiftwidth=4 softtabstop=4:
 
 #include <WiFi.h>
+#include <ESPmDNS.h>
 #include <NTPClient.h>
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
@@ -64,6 +65,7 @@ void wifiSetup() {
     int counter = 0;
     while (WiFi.status() != WL_CONNECTED) {
         if (counter > 10) {
+            Serial.println("Unable to connect to WiFi!");
             return;
         }
 
@@ -90,6 +92,13 @@ void wifiSetup() {
     Serial.print("http://");
     Serial.println(WiFi.localIP());
 #endif
+
+    // Set up mDNS
+    if (!MDNS.begin(WIFI_HOSTNAME)) {
+        // Reboot!
+        Serial.println("Unable to set up mDNS!");
+        return;
+    }
 }
 
 void setup() {
