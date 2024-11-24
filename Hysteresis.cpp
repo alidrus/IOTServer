@@ -93,13 +93,13 @@ void Hysteresis::setTargetDewPoint(float targetDewPoint) {
 void Hysteresis::incrementTargetDewPoint() {
     Serial.println("Hysteresis::incrementTargetDewPoint()");
 
-    this->targetDewPoint += 0.5;
+    this->targetDewPoint += 0.1;
 }
 
 void Hysteresis::decrementTargetDewPoint() {
     Serial.println("Hysteresis::decrementTargetDewPoint()");
 
-    this->targetDewPoint -= 0.5;
+    this->targetDewPoint -= 0.1;
 }
 
 bool Hysteresis::getCompressorIsOn() {
