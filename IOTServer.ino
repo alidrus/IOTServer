@@ -97,6 +97,7 @@ void wifiSetup() {
     if (!MDNS.begin(WIFI_HOSTNAME)) {
         // Reboot!
         Serial.println("Unable to set up mDNS!");
+
         return;
     }
 }
@@ -205,6 +206,7 @@ void webServerSetup() {
             };
 
             sprintf(stringBuffer, environmentResponse, targetDewPoint, temperature, dhtValues.humidity, heatIndex, dewPoint, comfortStatus, compressorIsOn ? "true" : "false");
+
             request->send(200, "application/json", stringBuffer);
         }
     });
@@ -259,6 +261,8 @@ void setup() {
 void timeSyncTask(void *parameters) {
     while (true) {
         if (WiFi.status() != WL_CONNECTED) {
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
+
             continue;
         }
 
@@ -275,6 +279,8 @@ void hysteresisTask(void *parameters) {
 
     while (true) {
         if (WiFi.status() != WL_CONNECTED) {
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
+
             continue;
         }
 
@@ -292,7 +298,7 @@ void hysteresisTask(void *parameters) {
             climateControl.monitorComfort(dewPoint);
         }
 
-        vTaskDelay(30000 / portTICK_PERIOD_MS);
+        vTaskDelay(20000 / portTICK_PERIOD_MS);
     }
 }
 
