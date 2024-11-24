@@ -101,21 +101,7 @@ void wifiSetup() {
     }
 }
 
-void setup() {
-#ifdef DEBUG_MODE
-    // Connect to serial console for DEBUG messages
-    Serial.begin(115200);
-#endif
-
-    dht.setup(DHT_PIN, DHTesp::DHT22);
-
-    delay(1000);
-
-    // Setup WiFi
-    wifiSetup();
-
-    timeClient.begin();
-
+void webServerSetup() {
 #ifdef DEBUG_MODE
     // DEBUG messages on serial console
     Serial.println("Starting server...");
@@ -235,32 +221,66 @@ void setup() {
     // DEBUG messages on serial console
     Serial.println("Server started");
 #endif
-
-    // First run of ntp update (time sync)
-    lastSyncTime = millis();
-    timeClient.update();
 }
 
-void loop() {
-    unsigned long timeElapsed = millis();
+void setup() {
+#ifdef DEBUG_MODE
+    // Connect to serial console for DEBUG messages
+    Serial.begin(115200);
+#endif
 
-    if (WiFi.status() != WL_CONNECTED) {
-        wifiSetup();
-    }
+    delay(1500);
 
-    // Run every 60 seconds
-    if (firstLoopIteration || (timeElapsed - lastSyncTime) >= 60000) {
-        lastSyncTime = timeElapsed;
+    // Setup WiFi
+    wifiSetup();
+
+    delay(500);
+
+    dht.setup(DHT_PIN, DHTesp::DHT22);
+
+    delay(250);
+
+    // Setup Web Server
+    webServerSetup();
+
+    delay(250);
+
+    // Begin time client
+    timeClient.begin();
+
+    delay(500);
+
+    // Create Tasks
+    xTaskCreate(timeSyncTask, "Time Sync", 2000, NULL, 1, NULL);
+    xTaskCreate(hysteresisTask, "Hysteresis", 2000, NULL, 1, NULL);
+    xTaskCreate(wifiHealthTask, "WiFi Healthcheck", 1000, NULL, 1, NULL);
+}
+
+void timeSyncTask(void *parameters) {
+    while (true) {
+        if (WiFi.status() != WL_CONNECTED) {
+            continue;
+        }
+
+        lastSyncTime = millis();
 
         timeClient.update();
+
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
+}
 
-    unsigned long rawTime = timeClient.getEpochTime();
-    unsigned long hours = (rawTime % 86400L) / 3600;
+void hysteresisTask(void *parameters) {
+    unsigned long rawTime, hours;
 
-    // Run every 60 seconds
-    if (firstLoopIteration || (timeElapsed - lastHysteresisTime) >= 60000) {
-        lastHysteresisTime = timeElapsed;
+    while (true) {
+        if (WiFi.status() != WL_CONNECTED) {
+            continue;
+        }
+
+        rawTime = timeClient.getEpochTime();
+
+        hours = (rawTime % 86400L) / 3600;
 
         // Only run from 8:00 AM and stop before 12:00 AM
         if (hours >= 8 && hours <= 23) {
@@ -271,7 +291,20 @@ void loop() {
 
             climateControl.monitorComfort(dewPoint);
         }
-    }
 
-    firstLoopIteration = false;
+        vTaskDelay(30000 / portTICK_PERIOD_MS);
+    }
+}
+
+void wifiHealthTask(void *parameters) {
+    while (true) {
+        if (WiFi.status() != WL_CONNECTED) {
+            wifiSetup();
+        }
+
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
+}
+
+void loop() {
 }
