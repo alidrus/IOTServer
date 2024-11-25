@@ -290,5 +290,4 @@ void multiTask(void *parameters) {
     }
 }
 
-void loop() {
-}
+void loop() {}
