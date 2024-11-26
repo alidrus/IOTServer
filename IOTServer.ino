@@ -30,12 +30,10 @@ ComfortState cf;
 
 Hysteresis climateControl;
 
-bool firstLoopIteration = true;
-
 static const char* okResponse = "HTTP/1.1 200 OK";
 static const char* contentHeaderJson = "Content-Type: application/json";
 static const char* contentHeaderHtml = "Content-Type: text/html";
-static const char* environmentResponse = "{\"ts\": \"%.1f\", \"t\": \"%.1f\", \"h\": \"%.1f\", \"hi\": \"%.1f\", \"dp\": \"%.1f\", \"cs\": \"%s\", \"co\": %s}";
+static const char* environmentResponse = "{\"ts\": \"%.2f\", \"t\": \"%.2f\", \"h\": \"%.2f\", \"hi\": \"%.2f\", \"dp\": \"%.2f\", \"cs\": \"%s\", \"co\": %s}";
 
 char stringBuffer[112];
 
