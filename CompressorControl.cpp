@@ -17,8 +17,8 @@ void CompressorControl::initialize() {
     IrSender.begin();
 }
 
-void CompressorControl::toggleACOnOff() {
-    Serial.println("CompressorControl::toggleACOnOff() executing IrSender.sendRaw(txPowerToggle)");
+void CompressorControl::powerToggle() {
+    Serial.println("CompressorControl::powerToggle() executing IrSender.sendRaw(txPowerToggle)");
 
     IrSender.sendRaw(CompressorControl::txPowerToggle, sizeof(CompressorControl::txPowerToggle) / sizeof(CompressorControl::txPowerToggle[0]), NEC_KHZ);
 

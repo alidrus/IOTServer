@@ -13,7 +13,7 @@ class CompressorControl {
     public:
         static void initialize();
 
-        static void toggleACOnOff();
+        static void powerToggle();
 
         static void turnOn();
 
