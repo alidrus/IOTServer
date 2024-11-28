@@ -1,6 +1,5 @@
 // vim: syntax=arduino autoindent expandtab tabstop=4 shiftwidth=4 softtabstop=4:
 
-#define COMPRESSOR_CONTROL_CPP
 #define USE_IRREMOTE_HPP_AS_PLAIN_INCLUDE
 
 #include "Pins.h"
@@ -8,24 +7,40 @@
 
 #include <IRremote.hpp>
 
-CompressorControl::CompressorControl() {
+bool CompressorControl::isOn = false;
+
+unsigned long CompressorControl::runStartTime = 0;
+
+unsigned long CompressorControl::restStartTime = 0;
+
+void CompressorControl::initialize() {
     IrSender.begin();
 }
 
-void CompressorControl::turnACOnOff() {
-    Serial.println("CompressorControl::turnACOnOff() executing IrSender.sendRaw(txPowerToggle)");
+void CompressorControl::toggleACOnOff() {
+    Serial.println("CompressorControl::toggleACOnOff() executing IrSender.sendRaw(txPowerToggle)");
 
-    IrSender.sendRaw(this->txPowerToggle, sizeof(this->txPowerToggle) / sizeof(this->txPowerToggle[0]), NEC_KHZ);
+    IrSender.sendRaw(CompressorControl::txPowerToggle, sizeof(CompressorControl::txPowerToggle) / sizeof(CompressorControl::txPowerToggle[0]), NEC_KHZ);
+
+    CompressorControl::isOn = false;
 }
 
-void CompressorControl::turnCompressorOn() {
-    Serial.println("CompressorControl::turnCompressorOn() executing IrSender.sendRaw(txCoolingMode)");
+void CompressorControl::turnOn() {
+    Serial.println("CompressorControl::turnOn() executing IrSender.sendRaw(txCoolingMode)");
 
-    IrSender.sendRaw(this->txCoolingMode, sizeof(this->txCoolingMode) / sizeof(this->txCoolingMode[0]), NEC_KHZ);
+    IrSender.sendRaw(CompressorControl::txCoolingMode, sizeof(CompressorControl::txCoolingMode) / sizeof(CompressorControl::txCoolingMode[0]), NEC_KHZ);
+
+    CompressorControl::isOn = true;
+
+    CompressorControl::runStartTime = millis();
 }
 
-void CompressorControl::turnCompressorOff() {
-    Serial.println("CompressorControl::turnCompressorOff() executing IrSender.sendRaw(txFanMode)");
+void CompressorControl::turnOff() {
+    Serial.println("CompressorControl::turnOff() executing IrSender.sendRaw(txFanMode)");
 
-    IrSender.sendRaw(this->txFanMode, sizeof(this->txFanMode) / sizeof(this->txFanMode[0]), NEC_KHZ);
+    IrSender.sendRaw(CompressorControl::txFanMode, sizeof(CompressorControl::txFanMode) / sizeof(CompressorControl::txFanMode[0]), NEC_KHZ);
+
+    CompressorControl::isOn = false;
+
+    CompressorControl::restStartTime = millis();
 }
