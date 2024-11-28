@@ -1,16 +1,11 @@
 // vim: syntax=arduino autoindent expandtab tabstop=4 shiftwidth=4 softtabstop=4:
 
-#define HYSTERESIS_CPP
-
-#include "CompressorControl.h"
 #include "Hysteresis.h"
 
 void Hysteresis::monitorComfort(float currentDewPoint) {
     Serial.print("Hysteresis::monitorComfort(");
     Serial.print(currentDewPoint);
     Serial.println(")");
-
-    CompressorControl compressorController;
 
     const unsigned long currentTime = millis(); // Function to get current time in seconds
 
@@ -25,54 +20,45 @@ void Hysteresis::monitorComfort(float currentDewPoint) {
 
     // Check if compressor should be turned ON
     if (currentDewPoint > (this->targetDewPoint + this->hysteresisBuffer)
-            && !this->compressorIsOn
-            && (((currentTime - this->compressorRestStartTime) > MIN_REST_TIME) || !applyHysteresis))
+            && !CompressorControl::isOn
+            && (((currentTime - CompressorControl::restStartTime) > MIN_REST_TIME) || !applyHysteresis))
     {
         // Turn compressor ON if heat index is above target and rest time has passed
-        this->compressorIsOn = true;
-        this->compressorRunStartTime = currentTime;
-        compressorAction = COMPRESSOR_TURN_ON;
+        CompressorControl::turnOn();
+
+        return;
     }
 
     // Check if compressor should be turned OFF
-    if (this->compressorIsOn
+    if (CompressorControl::isOn
             && ((applyHysteresis && currentDewPoint < (this->targetDewPoint - this->hysteresisBuffer))  // Apply hysteresis after cooldown time
                 || (!applyHysteresis && currentDewPoint < this->targetDewPoint)                         // No hysteresis during initial cooldown
-                || ((currentTime - this->compressorRunStartTime) > MAX_RUN_TIME)))                      // Max runtime safety cutoff
+                || ((currentTime - CompressorControl::runStartTime) > MAX_RUN_TIME)))                      // Max runtime safety cutoff
     {
         // Turn compressor OFF if any of the above conditions are met
-        this->compressorIsOn = false;
-        this->compressorRestStartTime = currentTime; // Start rest timer
-        compressorAction = COMPRESSOR_TURN_OFF;
+        CompressorControl::turnOff();
+
+        return;
     }
 
     // Failsafe to prevent compressor run-on:
     // Compressor was supposedly turned off but the dew point is a lot lower than the threshold
-    if (!this->compressorIsOn && currentDewPoint < (this->targetDewPoint - (1.4 * this->hysteresisBuffer)))
+    if (!CompressorControl::isOn && currentDewPoint < (this->targetDewPoint - (1.4 * this->hysteresisBuffer)))
     {
         // Turn compressor OFF and reset compressor rest start time
-        this->compressorIsOn = false;
-        this->compressorRestStartTime = currentTime; // Start rest timer
-        compressorAction = COMPRESSOR_TURN_OFF;
-    }
-    // Failsafe to prevent overheating:
-    // Compressor was supposedly turned on but the dew point is a lot higher than the threshold
-    else if (this->compressorIsOn && currentDewPoint > (this->targetDewPoint + (1.4 * this->hysteresisBuffer)))
-    {
-        // Turn compressor ON and reset compressor run start time
-        this->compressorIsOn = true;
-        this->compressorRunStartTime = currentTime;
-        compressorAction = COMPRESSOR_TURN_ON;
+        CompressorControl::turnOff();
+
+        return;
     }
 
-    // Run compressor control action only once
-    switch(compressorAction) {
-        case COMPRESSOR_TURN_OFF:
-            compressorController.turnCompressorOff(); // Send fan mode signal
-            break;
-        case COMPRESSOR_TURN_ON:
-            compressorController.turnCompressorOn(); // Send cooling mode signal
-            break;
+    // Failsafe to prevent overheating:
+    // Compressor was supposedly turned on but the dew point is a lot higher than the threshold
+    if (CompressorControl::isOn && currentDewPoint > (this->targetDewPoint + (1.4 * this->hysteresisBuffer)))
+    {
+        // Turn compressor ON and reset compressor run start time
+        CompressorControl::turnOn();
+
+        return;
     }
 }
 
@@ -102,6 +88,6 @@ void Hysteresis::decrementTargetDewPoint() {
     this->targetDewPoint -= 0.1;
 }
 
-bool Hysteresis::getCompressorIsOn() {
-    return this->compressorIsOn;
+bool Hysteresis::compressorIsOn() {
+    return CompressorControl::isOn;
 }

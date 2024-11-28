@@ -7,6 +7,8 @@
 #ifndef HYSTERESIS_H
 #define HYSTERESIS_H
 
+#include "CompressorControl.h"
+
 // Configurable limits
 #define MAX_RUN_TIME 900000                   // Max compressor run time in milliseconds (900,000 ms = 15 minutes)
 #define MIN_REST_TIME 180000                  // Min compressor rest time in milliseconds (180,000 ms = 3 minutes)
@@ -35,16 +37,13 @@ class Hysteresis
 
         void decrementTargetDewPoint();
 
-        bool getCompressorIsOn();
+        bool compressorIsOn();
 
     protected:
         float targetDewPoint;                       // Heat index is what the temperature "feels like"
+
         float hysteresisBuffer;                     // Buffer to prevent rapid cycling after initial cooldown
 
-        bool compressorIsOn = false;                // Is the compressor running?
-
-        unsigned long compressorRunStartTime = 0;   // When the compressor started running
-        unsigned long compressorRestStartTime = 0;  // When the compressor started resting
         unsigned long acStartTime = 0;              // Track the overall start time of the A/C
 };
 
