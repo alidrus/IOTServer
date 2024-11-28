@@ -37,6 +37,8 @@ static const char* environmentResponse = "{\"ts\": \"%.2f\", \"t\": \"%.2f\", \"
 
 char stringBuffer[112];
 
+bool hysteresisActive = true;
+
 void wifiSetup() {
     // Disconnect from WiFi
     WiFi.disconnect(true, true);
@@ -149,7 +151,26 @@ void webServerSetup() {
         request->send(200, "text/plain", "OK");
     });
 
-    // Route for GET request to /temperature
+
+    // Activate hysteresis
+    server.on("/hysteresis/on", HTTP_GET, [] (AsyncWebServerRequest *request) {
+        Serial.println("REQUEST: /hysteresis/on");
+
+        hysteresisActive = true;
+
+        request->send(200, "text/plain", "OK");
+    });
+
+    // Deactivate hysteresis
+    server.on("/hysteresis/off", HTTP_GET, [] (AsyncWebServerRequest *request) {
+        Serial.println("REQUEST: /hysteresis/off");
+
+        hysteresisActive = false;
+
+        request->send(200, "text/plain", "OK");
+    });
+
+    // Route for GET request to /environment
     server.on("/environment", HTTP_GET, [](AsyncWebServerRequest *request) {
         Serial.println("REQUEST: /environment");
 
@@ -163,7 +184,6 @@ void webServerSetup() {
             const float heatIndex = dht.computeHeatIndex(temperature, dhtValues.humidity);
             const float dewPoint = dht.computeDewPoint(temperature, dhtValues.humidity);
             const float cr = dht.getComfortRatio(cf, temperature, dhtValues.humidity);
-            const float compressorIsOn = climateControl.getCompressorIsOn();
 
             String comfortStatus;
 
@@ -200,7 +220,7 @@ void webServerSetup() {
                     break;
             };
 
-            sprintf(stringBuffer, environmentResponse, targetDewPoint, temperature, dhtValues.humidity, heatIndex, dewPoint, comfortStatus, compressorIsOn ? "true" : "false");
+            sprintf(stringBuffer, environmentResponse, targetDewPoint, temperature, dhtValues.humidity, heatIndex, dewPoint, comfortStatus, CompressorControl::isOn ? "true" : "false");
 
             request->send(200, "application/json", stringBuffer);
         }
@@ -247,6 +267,9 @@ void setup() {
 
     delay(500);
 
+    // Initialize compressor control class
+    CompressorControl::initialize();
+
     // Create Tasks
     xTaskCreate(multiTask, "Multiple Task", 4000, NULL, 1, NULL);
 }
@@ -254,9 +277,13 @@ void setup() {
 void multiTask(void *parameters) {
     int counter = 0;
 
-    unsigned long rawTime, hours;
+    unsigned long rawTime, currentHour;
 
     while (true) {
+        rawTime = timeClient.getEpochTime();
+
+        currentHour = (rawTime % 86400L) / 3600;
+
         // Check WiFi health and reconnect if needed
         if (WiFi.status() != WL_CONNECTED) {
             wifiSetup();
@@ -269,16 +296,39 @@ void multiTask(void *parameters) {
 
         // Run climate control monitoring every 20 seconds
         if (counter % 20 == 0) {
-            rawTime = timeClient.getEpochTime();
+            bool skipRest = false;
 
-            hours = (rawTime % 86400L) / 3600;
+            bool skipHysteresis = !hysteresisActive || (currentHour >= 0 && currentHour <= 6);
 
             TempAndHumidity dhtValues = dht.getTempAndHumidity();
 
             const float temperature = dhtValues.temperature + TEMPERATURE_CALIBRATION;
             const float dewPoint = dht.computeDewPoint(temperature, dhtValues.humidity);
+            const float targetDewPoint = climateControl.getTargetDewPoint();
 
-            climateControl.monitorComfort(dewPoint);
+            // If hysteresis is not being skipped, have the climate control routines monitor the comfort level
+            if (!skipRest && !skipHysteresis) {
+                climateControl.monitorComfort(dewPoint);
+
+                skipRest = true;
+            }
+
+            // If the compressor is still on during times when hysteresis is
+            // being skipped, turn off the compressor and skip the rest of the loop
+            if (!skipRest && skipHysteresis && CompressorControl::isOn) {
+                CompressorControl::turnOff();
+
+                skipRest = true;
+            }
+
+            // If we somehow reached this point during the off hours and the
+            // dew point is way below target, it means someone left the AC
+            // running and we need to turn off the compressor
+            if (!skipRest && skipHysteresis && dewPoint < (targetDewPoint - 1.0)) {
+                CompressorControl::turnOff();
+
+                skipRest = true;
+            }
         }
 
         counter += 1;
