@@ -9,8 +9,6 @@ void Hysteresis::monitorComfort(float currentDewPoint) {
 
     const unsigned long currentTime = millis(); // Function to get current time in seconds
 
-    int compressorAction = COMPRESSOR_NO_CHANGE;
-
     if (this->acStartTime == 0) {
         this->acStartTime = currentTime;
     }
@@ -33,7 +31,7 @@ void Hysteresis::monitorComfort(float currentDewPoint) {
     if (CompressorControl::isOn
             && ((applyHysteresis && currentDewPoint < (this->targetDewPoint - this->hysteresisBuffer))  // Apply hysteresis after cooldown time
                 || (!applyHysteresis && currentDewPoint < this->targetDewPoint)                         // No hysteresis during initial cooldown
-                || ((currentTime - CompressorControl::runStartTime) > MAX_RUN_TIME)))                      // Max runtime safety cutoff
+                || ((currentTime - CompressorControl::runStartTime) > MAX_RUN_TIME)))                   // Max runtime safety cutoff
     {
         // Turn compressor OFF if any of the above conditions are met
         CompressorControl::turnOff();
@@ -66,6 +64,12 @@ float Hysteresis::getTargetDewPoint() const {
     Serial.println("Hysteresis::getTargetDewPoint()");
 
     return this->targetDewPoint;
+}
+
+float Hysteresis::getHysteresisBuffer() const {
+    Serial.println("Hysteresis::getHysteresisBuffer()");
+
+    return this->hysteresisBuffer;
 }
 
 void Hysteresis::setTargetDewPoint(float targetDewPoint) {

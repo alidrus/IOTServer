@@ -14,10 +14,6 @@
 #define MIN_REST_TIME 180000                  // Min compressor rest time in milliseconds (180,000 ms = 3 minutes)
 #define INITIAL_COOLDOWN_TIME 1200000         // Initial pre-hysteresis cooling period in milliseconds (1,200,000 ms = 20 minutes)
 
-#define COMPRESSOR_TURN_OFF -1
-#define COMPRESSOR_NO_CHANGE 0
-#define COMPRESSOR_TURN_ON 1
-
 class Hysteresis
 {
     public:
@@ -30,6 +26,8 @@ class Hysteresis
         void monitorComfort(float currentDewPoint);
 
         float getTargetDewPoint() const;
+
+        float getHysteresisBuffer() const;
 
         void setTargetDewPoint(float targetDewPoint);
 
