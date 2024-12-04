@@ -297,25 +297,25 @@ void multiTask(void *parameters) {
         // Run climate control monitoring every 20 seconds
         if (counter % 20 == 0) {
             bool skipRest = false;
-
-            bool skipHysteresis = !hysteresisActive || (currentHour >= 0 && currentHour <= 6);
+            bool afterHours = currentHour >= 0 && currentHour <= 6;
 
             TempAndHumidity dhtValues = dht.getTempAndHumidity();
 
             const float temperature = dhtValues.temperature + TEMPERATURE_CALIBRATION;
             const float dewPoint = dht.computeDewPoint(temperature, dhtValues.humidity);
             const float targetDewPoint = climateControl.getTargetDewPoint();
+            const float hysteresisBuffer = climateControl.getHysteresisBuffer();
 
             // If hysteresis is not being skipped, have the climate control routines monitor the comfort level
-            if (!skipRest && !skipHysteresis) {
+            if (!afterHours && hysteresisActive) {
                 climateControl.monitorComfort(dewPoint);
 
                 skipRest = true;
             }
 
-            // If the compressor is still on during times when hysteresis is
-            // being skipped, turn off the compressor and skip the rest of the loop
-            if (!skipRest && skipHysteresis && CompressorControl::isOn) {
+            // If the compressor is still on during off hours, turn off the
+            // compressor and skip the rest of the climate monitoring if block
+            if (!skipRest && (afterHours || !hysteresisActive) && CompressorControl::isOn) {
                 CompressorControl::turnOff();
 
                 skipRest = true;
@@ -324,7 +324,7 @@ void multiTask(void *parameters) {
             // If we somehow reached this point during the off hours and the
             // dew point is way below target, it means someone left the AC
             // running and we need to turn off the compressor
-            if (!skipRest && skipHysteresis && dewPoint < (targetDewPoint - 1.0)) {
+            if (!skipRest && (afterHours || !hysteresisActive) && dewPoint < (targetDewPoint - hysteresisBuffer)) {
                 CompressorControl::turnOff();
 
                 skipRest = true;
