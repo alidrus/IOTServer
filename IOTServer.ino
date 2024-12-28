@@ -133,6 +133,16 @@ void webServerSetup() {
         request->send(200, "text/javascript; charset=UTF-8", indexJs);
     });
 
+    // Send power toggle
+    server.on("/power", HTTP_GET, [] (AsyncWebServerRequest *request) {
+        Serial.println("REQUEST: /power");
+
+        // Power Toggle
+        CompressorControl::powerToggle();
+
+        request->send(200, "text/plain", "OK");
+    });
+
     // Increase temperature
     server.on("/temperature/up", HTTP_GET, [] (AsyncWebServerRequest *request) {
         Serial.println("REQUEST: /temperature/up");
@@ -150,7 +160,6 @@ void webServerSetup() {
 
         request->send(200, "text/plain", "OK");
     });
-
 
     // Activate hysteresis
     server.on("/hysteresis/on", HTTP_GET, [] (AsyncWebServerRequest *request) {
